@@ -68,26 +68,27 @@ export default function HomePage({ onOpen }) {
       fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
     }}>
       {/* Top bar */}
-      <div style={{
+      <div className="home-topbar" style={{
         height: 56, backgroundColor: '#fff',
         borderBottom: '1px solid #E2E8F0',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '0 32px', flexShrink: 0,
+        flexShrink: 0,
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <div style={{
             width: 28, height: 28, borderRadius: 7, backgroundColor: '#3B82F6',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
+            flexShrink: 0,
           }}>
             <span style={{ fontSize: 14, fontWeight: 700, color: '#fff', lineHeight: 1 }}>H</span>
           </div>
-          <span style={{ fontSize: 15, fontWeight: 600, color: '#0F172A' }}>Hyperface Studio</span>
-          <span style={{ fontSize: 12, color: '#CBD5E1', marginLeft: 2 }}>/</span>
-          <span style={{ fontSize: 13, color: '#64748B' }}>Dashboard</span>
+          <span style={{ fontSize: 15, fontWeight: 600, color: '#0F172A', whiteSpace: 'nowrap' }}>Hyperface Studio</span>
+          <span className="home-topbar-breadcrumb" style={{ fontSize: 12, color: '#CBD5E1', marginLeft: 2 }}>/</span>
+          <span className="home-topbar-breadcrumb" style={{ fontSize: 13, color: '#64748B' }}>Dashboard</span>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <button style={{
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+          <button className="home-topbar-actlog" style={{
             display: 'flex', alignItems: 'center', gap: 6,
             fontSize: 13, fontWeight: 500, color: '#64748B',
             border: '1px solid #E2E8F0', borderRadius: 8,
@@ -121,11 +122,11 @@ export default function HomePage({ onOpen }) {
       </div>
 
       {/* Scrollable body */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '32px 40px' }}>
+      <div className="home-body" style={{ flex: 1, overflowY: 'auto' }}>
 
         {/* Hero */}
         <div style={{ marginBottom: 28 }}>
-          <h1 style={{ fontSize: 22, fontWeight: 700, color: '#0F172A', margin: '0 0 6px' }}>
+          <h1 className="home-hero-title" style={{ fontSize: 22, fontWeight: 700, color: '#0F172A', margin: '0 0 6px' }}>
             Welcome back 👋
           </h1>
           <p style={{ fontSize: 13, color: '#64748B', margin: 0 }}>
@@ -134,7 +135,7 @@ export default function HomePage({ onOpen }) {
         </div>
 
         {/* Stats row */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 32 }}>
+        <div className="home-stats-grid">
           {STATS.map((s, i) => (
             <div key={i} style={{
               backgroundColor: '#fff', borderRadius: 12, padding: '18px 20px',
@@ -160,7 +161,7 @@ export default function HomePage({ onOpen }) {
         </div>
 
         {/* Programs section header */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+        <div className="home-section-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
           <div>
             <h2 style={{ fontSize: 15, fontWeight: 700, color: '#0F172A', margin: '0 0 3px' }}>Your Programs</h2>
             <p style={{ fontSize: 12, color: '#94A3B8', margin: 0 }}>
@@ -176,7 +177,7 @@ export default function HomePage({ onOpen }) {
         </div>
 
         {/* Programs grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
+        <div className="home-programs-grid">
           {PROGRAMS.map(prog => (
             <ProgramCard key={prog.id} prog={prog} onOpen={onOpen} />
           ))}
