@@ -92,7 +92,7 @@ function BureauConfigTab() {
       {/* Sub-section A: Bureau Provider */}
       <div>
         <SectionLabel>Bureau Provider</SectionLabel>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+        <div className="settings-2col" style={{ gap: 10 }}>
           {BUREAUS.map((b) => {
             const active = selectedBureau === b.id
             return (
@@ -139,7 +139,7 @@ function BureauConfigTab() {
       {/* Sub-section B: Pull Type */}
       <div>
         <SectionLabel>Pull Type</SectionLabel>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+        <div className="settings-2col" style={{ gap: 10 }}>
           {PULL_TYPES.map((p) => {
             const active = pullType === p.id
             return (
@@ -188,7 +188,7 @@ function BureauConfigTab() {
         <p style={{ fontSize: 12, color: '#94A3B8', margin: '0 0 10px', lineHeight: 1.5 }}>
           If the primary bureau is unavailable or returns an error, automatically retry with this bureau.
         </p>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+        <div className="settings-3col" style={{ gap: 8 }}>
           {[{ id: 'none', label: 'None', desc: 'Hard-fail on bureau error' }, ...BUREAUS.filter(b => b.id !== selectedBureau)].map((b) => {
             const active = fallbackBureau === b.id
             return (
@@ -232,7 +232,7 @@ function BureauConfigTab() {
         <p style={{ fontSize: 12, color: '#94A3B8', margin: '0 0 10px', lineHeight: 1.5 }}>
           Applicants with no credit history (NTC / thin file). Bureau returns no score for these users.
         </p>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+        <div className="settings-3col" style={{ gap: 8 }}>
           {[
             { id: 'approve', label: 'Approve (Basic)', color: '#16A34A', bg: '#F0FDF4', border: '#86EFAC', desc: 'Auto-approve with Basic card variant' },
             { id: 'review',  label: 'Manual Review',  color: '#D97706', bg: '#FFFBEB', border: '#FDE68A', desc: 'Refer to agent for document review' },

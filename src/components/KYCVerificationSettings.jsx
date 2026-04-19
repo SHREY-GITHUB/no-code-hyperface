@@ -195,7 +195,7 @@ function KYCMethodTab({ kycMethods, setKycMethods }) {
       {/* Sub-section B: KYC Timing */}
       <div>
         <SectionLabel>When should KYC happen?</SectionLabel>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+        <div className="settings-2col" style={{ gap: 10 }}>
           {TIMING_OPTIONS.map((opt) => {
             const active = timing === opt.id
             return (

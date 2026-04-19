@@ -639,7 +639,7 @@ export default function ApplicationFormSettings({ fields, setFields }) {
       <div
         className="flex items-center justify-between shrink-0"
         style={{
-          padding: '12px 32px',
+          padding: '12px clamp(16px, 4vw, 32px)',
           backgroundColor: '#FFFFFF',
           borderTop: '1px solid #E2E8F0',
         }}

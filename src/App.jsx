@@ -40,6 +40,7 @@ export default function App() {
   const [previewOpen, setPreviewOpen]   = useState(false)
   const [analyticsOpen, setAnalyticsOpen] = useState(false)
   const [clientId, setClientId]         = useState('hdfc')
+  const [menuOpen, setMenuOpen]         = useState(false)
   const [demoControls, setDemoControls] = useState({
     bureauFailure: false,
     manualReview: false,
@@ -50,6 +51,12 @@ export default function App() {
   function openEditor(id) {
     setClientId(id)
     setHomePage(false)
+  }
+
+  /* Close drawer when a stage is selected on mobile */
+  function handleSelectStage(name) {
+    setSelectedStage(name)
+    setMenuOpen(false)
   }
 
   if (homePage) {
@@ -77,15 +84,26 @@ export default function App() {
           clientId={clientId}
         />
       )}
+
+      {/* Drawer backdrop — mobile only */}
+      <div
+        className={`drawer-overlay ${menuOpen ? 'menu-open' : ''}`}
+        onClick={() => setMenuOpen(false)}
+      />
+
       <div className="flex h-screen w-screen overflow-hidden font-sans">
-        <LeftPanel
-          stages={stages}
-          setStages={setStages}
-          selectedStage={selectedStage}
-          onSelectStage={setSelectedStage}
-          onHome={() => setHomePage(true)}
-          onPublish={() => setPublishOpen(true)}
-        />
+        {/* Left panel — becomes slide-in drawer on mobile */}
+        <div className={`left-panel-drawer ${menuOpen ? 'menu-open' : ''}`}>
+          <LeftPanel
+            stages={stages}
+            setStages={setStages}
+            selectedStage={selectedStage}
+            onSelectStage={handleSelectStage}
+            onHome={() => setHomePage(true)}
+            onPublish={() => { setPublishOpen(true); setMenuOpen(false) }}
+          />
+        </div>
+
         <MiddlePanel
           selectedStage={selectedStage}
           fields={fields} setFields={setFields}
@@ -94,16 +112,24 @@ export default function App() {
           clientId={clientId} setClientId={setClientId}
           demoControls={demoControls}
           analyticsOpen={analyticsOpen} setAnalyticsOpen={setAnalyticsOpen}
+          onMenuOpen={() => setMenuOpen(true)}
         />
-        <RightPanel
-          selectedStage={selectedStage}
-          fields={fields}
-          kycMethods={kycMethods}
-          stages={stages}
-        />
+
+        {/* Right panel — hidden on mobile via CSS */}
+        <div className="right-panel-desktop">
+          <RightPanel
+            selectedStage={selectedStage}
+            fields={fields}
+            kycMethods={kycMethods}
+            stages={stages}
+          />
+        </div>
       </div>
+
       {!previewOpen && (
-        <DemoControlsPanel controls={demoControls} onChange={setDemoControls} />
+        <div className="demo-panel-wrap">
+          <DemoControlsPanel controls={demoControls} onChange={setDemoControls} />
+        </div>
       )}
     </>
   )

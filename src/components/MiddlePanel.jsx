@@ -112,7 +112,7 @@ function ClientSelector({ clientId, setClientId }) {
 export default function MiddlePanel({
   selectedStage, fields, setFields, kycMethods, setKycMethods,
   onPreviewClick, clientId, setClientId, demoControls,
-  analyticsOpen, setAnalyticsOpen,
+  analyticsOpen, setAnalyticsOpen, onMenuOpen,
 }) {
   const scenarioActive = demoControls && Object.values(demoControls).some(Boolean)
   /* Determine what panel content to render */
@@ -140,44 +140,61 @@ export default function MiddlePanel({
 
       {/* Top bar */}
       <div
-        className="flex items-center justify-between shrink-0 px-6"
-        style={{
-          height: 56, backgroundColor: '#FFFFFF', borderBottom: '1px solid #E2E8F0',
-        }}
+        className="middle-topbar flex items-center justify-between shrink-0"
+        style={{ height: 56, backgroundColor: '#FFFFFF', borderBottom: '1px solid #E2E8F0' }}
       >
-        {/* Breadcrumb with client selector */}
-        <nav className="flex items-center gap-1.5" style={{ fontSize: 13, color: '#64748B' }}>
-          <span className="font-medium" style={{ color: '#1E293B' }}>Hyperface Studio</span>
-          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-            <path d="M4.5 3L7.5 6L4.5 9" stroke="#94A3B8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-          <ClientSelector clientId={clientId} setClientId={setClientId} />
-        </nav>
+        <div className="flex items-center gap-2.5" style={{ minWidth: 0 }}>
+          {/* Hamburger — mobile only */}
+          <button
+            className="mobile-menu-btn"
+            onClick={onMenuOpen}
+            style={{
+              width: 34, height: 34, border: '1px solid #E2E8F0', borderRadius: 8,
+              backgroundColor: '#F8FAFC', cursor: 'pointer', color: '#64748B',
+              alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+            }}
+          >
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M2 4h12M2 8h12M2 12h12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+            </svg>
+          </button>
+
+          {/* Breadcrumb with client selector */}
+          <nav className="flex items-center gap-1.5" style={{ fontSize: 13, color: '#64748B', minWidth: 0 }}>
+            <span className="font-medium hidden sm:inline" style={{ color: '#1E293B', whiteSpace: 'nowrap' }}>Hyperface Studio</span>
+            <svg className="hidden sm:block" width="12" height="12" viewBox="0 0 12 12" fill="none">
+              <path d="M4.5 3L7.5 6L4.5 9" stroke="#94A3B8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            <ClientSelector clientId={clientId} setClientId={setClientId} />
+          </nav>
+        </div>
 
         {/* Right side actions */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 shrink-0">
           <span
             style={{
               fontSize: 12, fontWeight: 500, color: '#D97706',
               backgroundColor: '#FEF3C7', borderRadius: 6, padding: '3px 10px',
+              whiteSpace: 'nowrap',
             }}
           >
             Draft
           </span>
           {scenarioActive && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+            <div className="scenario-text" style={{ alignItems: 'center', gap: 5 }}>
               <span style={{ width: 7, height: 7, borderRadius: '50%', backgroundColor: '#EF4444', display: 'inline-block', flexShrink: 0 }} />
-              <span style={{ fontSize: 11, fontWeight: 500, color: '#EF4444' }}>Scenario Active</span>
+              <span style={{ fontSize: 11, fontWeight: 500, color: '#EF4444', whiteSpace: 'nowrap' }}>Scenario Active</span>
             </div>
           )}
           <button
             onClick={() => setAnalyticsOpen(v => !v)}
+            title="Analytics"
             style={{
               display: 'flex', alignItems: 'center', gap: 6,
               fontSize: 13, fontWeight: 500,
               color: analyticsOpen ? '#1D4ED8' : '#64748B',
               border: `1.5px solid ${analyticsOpen ? '#3B82F6' : '#E2E8F0'}`,
-              borderRadius: 8, padding: '6px 14px',
+              borderRadius: 8, padding: '6px 10px',
               backgroundColor: analyticsOpen ? '#EFF6FF' : 'transparent',
               cursor: 'pointer',
               transition: 'background-color 0.15s, border-color 0.15s, color 0.15s',
@@ -200,19 +217,21 @@ export default function MiddlePanel({
               <rect x="5.5" y="5" width="3" height="8" rx="0.75" fill="currentColor" opacity="0.85"/>
               <rect x="10" y="2" width="3" height="11" rx="0.75" fill="currentColor"/>
             </svg>
-            Analytics
+            <span className="hidden sm:inline">Analytics</span>
           </button>
           <button
             onClick={onPreviewClick}
             style={{
               fontSize: 13, fontWeight: 500, color: '#3B82F6',
               border: '1.5px solid #3B82F6', borderRadius: 8,
-              padding: '6px 16px', backgroundColor: 'transparent', cursor: 'pointer',
+              padding: '6px 12px', backgroundColor: 'transparent', cursor: 'pointer',
+              whiteSpace: 'nowrap',
             }}
             onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#EFF6FF' }}
             onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent' }}
           >
-            Preview Journey
+            <span className="hidden sm:inline">Preview Journey</span>
+            <span className="sm:hidden">Preview</span>
           </button>
         </div>
       </div>
@@ -229,10 +248,9 @@ export default function MiddlePanel({
       ) : content ? (
         <div
           key={selectedStage}
-          className="flex-1 overflow-hidden"
+          className="flex-1 overflow-hidden settings-content-pad"
           style={{
             backgroundColor: '#F1F5F9',
-            padding: '24px 24px 0',
             animation: 'stageFadeIn 0.2s ease-out',
           }}
         >
@@ -245,12 +263,14 @@ export default function MiddlePanel({
           style={{ animation: 'stageFadeIn 0.2s ease-out' }}
         >
           <div
-            className="flex flex-col items-center justify-center text-center"
+            className="empty-state-card flex flex-col items-center justify-center text-center"
             style={{
               backgroundColor: '#FFFFFF',
               borderRadius: 12,
               padding: 32,
               minWidth: 360,
+              width: '100%',
+              maxWidth: 420,
               boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
             }}
           >

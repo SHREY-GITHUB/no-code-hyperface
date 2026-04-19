@@ -44,12 +44,12 @@ export default function PublishModal({ onClose, stages, fields, kycMethods, clie
         animation: 'fadeIn 0.15s ease-out',
       }}
     >
-      <div style={{
-        backgroundColor: '#fff', borderRadius: 16, width: 540,
+      <div className="publish-modal-box" style={{
+        backgroundColor: '#fff',
         boxShadow: '0 24px 64px rgba(0,0,0,0.18), 0 4px 16px rgba(0,0,0,0.08)',
         overflow: 'hidden',
         animation: 'fadeSlideUp 0.2s ease-out',
-        maxHeight: '90vh', display: 'flex', flexDirection: 'column',
+        display: 'flex', flexDirection: 'column',
       }}>
 
         {/* Header */}

@@ -106,6 +106,110 @@ button:not([disabled]):active {
   transform: scale(0.98);
 }
 
+/* ─── Main editor layout ─────────────────────────────────── */
+
+/* Left panel: slide-in drawer on mobile */
+.left-panel-drawer {
+  transition: transform 0.25s cubic-bezier(0.4,0,0.2,1);
+}
+
+/* Right panel: hidden on mobile */
+.right-panel-desktop { display: flex; flex-direction: column; height: 100%; }
+
+/* Overlay behind open drawer */
+.drawer-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 490;
+  animation: fadeIn 0.2s ease-out;
+}
+
+/* Mobile top bar hamburger — hidden on desktop */
+.mobile-menu-btn { display: none; }
+
+/* Scenario active text — hidden on very small screens */
+.scenario-text { display: flex; }
+
+/* Middle panel top bar — full padding on desktop */
+.middle-topbar { padding: 0 24px; }
+
+/* Settings panels — 2-col grids */
+.settings-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.settings-3col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+.settings-pad  { padding: 28px 32px; }
+
+/* Publish modal */
+.publish-modal-box {
+  width: 540px;
+  max-height: 90vh;
+  border-radius: 16px;
+  position: relative;
+}
+
+/* Settings content area padding */
+.settings-content-pad { padding: 24px 24px 0; }
+
+/* Demo controls panel */
+.demo-panel-wrap {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 400;
+}
+
+@media (max-width: 768px) {
+  /* Left panel: off-screen by default, slides in when .menu-open */
+  .left-panel-drawer {
+    position: fixed !important;
+    top: 0; left: 0;
+    height: 100vh;
+    z-index: 500;
+    transform: translateX(-100%);
+  }
+  .left-panel-drawer.menu-open {
+    transform: translateX(0);
+  }
+  .drawer-overlay.menu-open { display: block; }
+
+  /* Right panel: hidden on mobile */
+  .right-panel-desktop { display: none !important; }
+
+  /* Hamburger visible on mobile */
+  .mobile-menu-btn { display: flex !important; }
+
+  /* Scenario active text — hide label, keep dot */
+  .scenario-text span:last-child { display: none; }
+
+  /* Middle top bar compact */
+  .middle-topbar { padding: 0 14px; }
+
+  /* Collapse 2/3-col grids to 1-col */
+  .settings-2col { grid-template-columns: 1fr !important; }
+  .settings-3col { grid-template-columns: 1fr !important; }
+
+  /* Tighter inner padding on settings panels */
+  .settings-pad  { padding: 20px 16px !important; }
+  .settings-content-pad { padding: 12px 12px 0 !important; }
+
+  /* Empty state card min-width override */
+  .empty-state-card { min-width: 0 !important; width: 100%; }
+
+  /* Publish modal full-screen */
+  .publish-modal-box {
+    width: 100vw !important;
+    max-height: 100dvh !important;
+    border-radius: 0 !important;
+    height: 100dvh;
+  }
+
+  /* Demo controls — bottom-left on mobile, smaller */
+  .demo-panel-wrap {
+    right: 12px;
+    bottom: 12px;
+  }
+}
+
 /* ─── HomePage responsive layout ────────────────────────── */
 
 .home-topbar        { padding: 0 32px; }
