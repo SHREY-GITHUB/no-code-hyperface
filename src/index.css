@@ -1,0 +1,107 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* ─── Keyframes ─────────────────────────────────────────── */
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pulse-ring {
+  0%   { transform: scale(0.9); opacity: 0.7; }
+  50%  { transform: scale(1.08); opacity: 0.3; }
+  100% { transform: scale(0.9); opacity: 0.7; }
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+
+/* Spring-like bounce for success checkmark */
+@keyframes springIn {
+  0%   { transform: scale(0);    opacity: 0; }
+  55%  { transform: scale(1.12); opacity: 1; }
+  75%  { transform: scale(0.95); }
+  100% { transform: scale(1);    opacity: 1; }
+}
+
+@keyframes fadeSlideUp {
+  from { transform: translateY(16px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+/* Checkmark stroke draw — for bureau rows (short path ~12px) */
+@keyframes checkDraw {
+  from { stroke-dashoffset: 20; }
+  to   { stroke-dashoffset: 0; }
+}
+
+/* Slide in from right — for preview screen transitions */
+@keyframes slideInFromRight {
+  from { transform: translateX(100%); }
+  to   { transform: translateX(0); }
+}
+
+/* Slide out to left — for departing preview screens */
+@keyframes slideOutToLeft {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-100%); }
+}
+
+/* Fade + subtle lift — for middle panel stage switch */
+@keyframes stageFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Simple fade for dropdowns / overlays */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Analytics funnel / outcome bars grow in — --bar-w must be set inline */
+@keyframes barGrow {
+  from { width: 0%; }
+  to   { width: var(--bar-w); }
+}
+
+/* ─── Scrollbar ──────────────────────────────────────────── */
+
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 99px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
+
+/* ─── Global button polish ───────────────────────────────── */
+
+button {
+  transition: opacity 0.15s, background-color 0.15s, transform 0.1s;
+}
+
+/* Subtle press effect on all non-disabled buttons */
+button:not([disabled]):active {
+  transform: scale(0.98);
+}

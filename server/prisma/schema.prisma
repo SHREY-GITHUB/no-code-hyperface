@@ -1,0 +1,364 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// Hyperface Studio — Prisma Schema
+// Database: PostgreSQL (use SQLite for quick local dev: change provider below)
+// Run: cd server && npm run db:push && npm run db:seed
+// ─────────────────────────────────────────────────────────────────────────────
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  // For quick local dev without Docker, swap to:
+  // provider = "sqlite"
+  // url      = "file:./dev.db"
+}
+
+// ─── Enums ────────────────────────────────────────────────────────────────────
+
+enum ProgramStatus {
+  DRAFT
+  LIVE
+  PAUSED
+  ARCHIVED
+}
+
+enum FieldType {
+  TEXT
+  DATE
+  DROPDOWN
+  NUMBER
+}
+
+enum KycMethodName {
+  AADHAAR_OTP
+  VIDEO_KYC
+  DIGI_LOCKER
+  MANUAL_UPLOAD
+}
+
+enum BureauName {
+  CIBIL
+  EXPERIAN
+  EQUIFAX
+  CRIF
+}
+
+enum PullType {
+  SOFT
+  HARD
+}
+
+enum NtcPolicy {
+  AUTO_APPROVE
+  MANUAL_REVIEW
+  AUTO_DECLINE
+}
+
+enum ValidationRuleType {
+  RANGE
+  MIN
+  MAX
+  PATTERN
+}
+
+enum ApplicationStatus {
+  STARTED
+  IN_PROGRESS
+  BUREAU_PENDING
+  KYC_PENDING
+  AGREEMENT_PENDING
+  SUBMITTED
+  APPROVED
+  DECLINED
+  MANUAL_REVIEW
+  ABANDONED
+  EXPIRED
+}
+
+enum BureauDecision {
+  APPROVED
+  MANUAL_REVIEW
+  DECLINED
+  ERROR
+}
+
+enum KycVerificationStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+// ─── Journey Configuration Models ─────────────────────────────────────────────
+
+/// One credit card program managed in Hyperface Studio (e.g. HDFC Millenia).
+model Program {
+  id           String        @id @default(cuid())
+  slug         String        @unique            // "hdfc-millenia", "slice-student", "jupiter-edge"
+  name         String                           // "HDFC Millenia Card Program"
+  bankName     String                           // "HDFC Bank"
+  productType  String        @default("Credit Card")
+  status       ProgramStatus @default(DRAFT)
+  colorHex     String        @default("#1D4ED8") // accent colour for UI
+  bgHex        String        @default("#EFF6FF") // background colour for logo chip
+  logoInitial  String        @default("H")       // single letter shown in logo chip
+  webhookUrl   String?                           // posted on application events
+  publishedAt  DateTime?
+  deletedAt    DateTime?                         // soft delete
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  stages            JourneyStage[]
+  fields            FormField[]
+  kycMethods        KycMethodConfig[]
+  bureauConfig      BureauConfig?
+  creditLimitConfig CreditLimitConfig?
+  validationRules   ValidationRule[]
+  versions          JourneyVersion[]
+  applications      Application[]
+
+  @@map("programs")
+}
+
+/// Ordered step in the onboarding journey (Application Form, Bureau, KYC, Agreement).
+model JourneyStage {
+  id        String   @id @default(cuid())
+  programId String
+  name      String                        // "Application Form"
+  sortOrder Int                           // 1 = first shown
+  enabled   Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  program Program @relation(fields: [programId], references: [id], onDelete: Cascade)
+
+  @@unique([programId, sortOrder])
+  @@unique([programId, name])
+  @@map("journey_stages")
+}
+
+/// A configurable field on the Application Form stage.
+model FormField {
+  id        String    @id @default(cuid())
+  programId String
+  name      String                       // "Full Name"
+  fieldType FieldType                    // TEXT, DATE, DROPDOWN, NUMBER
+  show      Boolean   @default(true)     // visible to applicant
+  required  Boolean   @default(true)
+  hint      String?                      // helper text in Studio config UI
+  page      Int       @default(1)        // multi-page form: which page (1–4)
+  sortOrder Int                          // position within the page
+  options   Json?                        // ["Salaried", "Self-Employed", ...] for DROPDOWN
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  program Program @relation(fields: [programId], references: [id], onDelete: Cascade)
+
+  @@unique([programId, name])
+  @@map("form_fields")
+}
+
+/// Toggle-able KYC verification method (Aadhaar OTP, Video KYC, DigiLocker, Manual Upload).
+model KycMethodConfig {
+  id          String        @id @default(cuid())
+  programId   String
+  methodName  KycMethodName                    // AADHAAR_OTP, VIDEO_KYC, etc.
+  enabled     Boolean       @default(false)
+  description String?
+  sortOrder   Int
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  program Program @relation(fields: [programId], references: [id], onDelete: Cascade)
+
+  @@unique([programId, methodName])
+  @@map("kyc_method_configs")
+}
+
+/// Bureau & Decisioning configuration — which bureau, pull type, score thresholds, NTC policy.
+model BureauConfig {
+  id                 String     @id @default(cuid())
+  programId          String     @unique
+  primaryBureau      BureauName @default(CIBIL)
+  fallbackBureau     BureauName?
+  pullType           PullType   @default(SOFT)
+  ntcPolicy          NtcPolicy  @default(MANUAL_REVIEW)
+  thresholdApprove   Int        @default(750)   // score >= this → auto-approve
+  thresholdReview    Int        @default(650)   // score in [thresholdReview, thresholdApprove) → manual review
+  // score < thresholdReview → auto-decline
+  incomeMinimum      Int        @default(25000) // ₹/month minimum to not be flagged
+  reviewSlaHours     Int        @default(48)    // manual review SLA
+  escalateOnBreach   Boolean    @default(true)
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+
+  program           Program            @relation(fields: [programId], references: [id], onDelete: Cascade)
+  creditLimitConfig CreditLimitConfig?
+
+  @@map("bureau_configs")
+}
+
+/// Credit limit engine config — income multiplier, score band adjustments, min/max cap.
+model CreditLimitConfig {
+  id               String   @id @default(cuid())
+  bureauConfigId   String   @unique
+  minLimit         Int      @default(10000)     // ₹ floor for any offered limit
+  maxLimit         Int      @default(300000)    // ₹ ceiling
+  incomeMultiplier Float    @default(3.0)       // credit limit = income × multiplier
+  roundingNearest  Int      @default(1000)      // round to nearest ₹1,000 / ₹5,000 etc.
+  /// JSON array: [{ scoreMin: 750, scoreMax: 900, adjustment: 0.2 }, ...]
+  /// adjustment is fractional: 0.2 = +20%, -0.1 = −10%
+  bandAdjustments  Json     @default("[]")
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  bureauConfig BureauConfig @relation(fields: [bureauConfigId], references: [id], onDelete: Cascade)
+
+  @@map("credit_limit_configs")
+}
+
+/// Validation rule on the Application Form (age range, income min, PAN format, etc.)
+model ValidationRule {
+  id          String             @id @default(cuid())
+  programId   String
+  label       String                             // "Age Range"
+  description String?
+  ruleType    ValidationRuleType                 // RANGE, MIN, MAX, PATTERN
+  enabled     Boolean            @default(true)
+  minValue    Float?                             // for RANGE / MIN
+  maxValue    Float?                             // for RANGE / MAX
+  unit        String?                            // "years", "₹"
+  pattern     String?                            // regex string for PATTERN rules
+  displayText String?                            // "AAAAA9999A" — human-readable pattern
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  program Program @relation(fields: [programId], references: [id], onDelete: Cascade)
+
+  @@unique([programId, label])
+  @@map("validation_rules")
+}
+
+/// Immutable snapshot of a program's full config at the moment it was published.
+/// Roll back = restore this snapshot. Always keep all versions for audit.
+model JourneyVersion {
+  id            String   @id @default(cuid())
+  programId     String
+  versionNumber Int                            // monotonically increasing per program
+  isActive      Boolean  @default(false)       // only 1 active per program at any time
+  publishedBy   String?                        // user email / ID (free text for now)
+  webhookUrl    String?                        // webhook at time of publish
+  /// Full serialised config: { stages, fields, kycMethods, bureauConfig, creditLimitConfig, validationRules }
+  snapshot      Json
+  publishedAt   DateTime @default(now())
+
+  program      Program       @relation(fields: [programId], references: [id], onDelete: Cascade)
+  applications Application[]
+
+  @@unique([programId, versionNumber])
+  @@index([programId, isActive])
+  @@map("journey_versions")
+}
+
+// ─── Runtime / Applicant Models ───────────────────────────────────────────────
+
+/// An applicant's onboarding session for a specific program and journey version.
+model Application {
+  id                 String            @id @default(cuid())
+  programId          String
+  journeyVersionId   String?
+  sessionId          String?           @unique        // browser sessionStorage ID
+  status             ApplicationStatus @default(STARTED)
+  currentStage       String?                          // name of stage applicant is on
+  currentFormPage    Int               @default(1)
+  /// ⚠️  PII — encrypt before writing in production. Null until real flow is wired.
+  formData           Json?
+  creditLimitOffered Int?                             // ₹, populated on approval
+  /// UTM params for attribution
+  utmSource          String?
+  utmMedium          String?
+  utmCampaign        String?
+  ipAddress          String?
+  userAgent          String?
+  startedAt          DateTime          @default(now())
+  submittedAt        DateTime?
+  completedAt        DateTime?
+  abandonedAt        DateTime?
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+
+  program        Program           @relation(fields: [programId], references: [id])
+  journeyVersion JourneyVersion?   @relation(fields: [journeyVersionId], references: [id])
+  events         ApplicationEvent[]
+  bureauChecks   BureauCheck[]
+  kycVerifications KycVerification[]
+
+  @@index([programId, status])
+  @@index([startedAt])
+  @@map("applications")
+}
+
+/// Immutable audit trail — one row per notable event in an applicant's journey.
+/// eventType is a free-text string (not enum) so the vocabulary can grow without migrations.
+/// Standard types: journey_started | form_page_viewed | form_page_completed |
+///   stage_completed | bureau_initiated | bureau_completed | offer_presented |
+///   offer_accepted | kyc_initiated | kyc_completed | agreement_viewed |
+///   agreement_signed | journey_completed | journey_abandoned
+model ApplicationEvent {
+  id            String   @id @default(cuid())
+  applicationId String
+  eventType     String                       // see comment above for standard types
+  stageName     String?                      // which stage this event belongs to
+  pageNumber    Int?                         // for form_page_* events
+  timeSpentMs   Int?                         // ms on this page/stage before event fired
+  /// Arbitrary context: score, decision, method, fieldName, etc.
+  metadata      Json?
+  occurredAt    DateTime @default(now())
+
+  application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  @@index([applicationId, occurredAt])
+  @@index([eventType])
+  @@map("application_events")
+}
+
+/// Result of a bureau credit pull for an application.
+model BureauCheck {
+  id              String         @id @default(cuid())
+  applicationId   String
+  bureauName      BureauName
+  pullType        PullType       @default(SOFT)
+  score           Int?                            // null if bureau returned an error
+  decision        BureauDecision
+  isFallback      Boolean        @default(false)  // true if primary bureau failed
+  reportReference String?                         // external bureau report ID
+  errorMessage    String?
+  /// Sanitised raw bureau response — strip PAN/Aadhaar before storing
+  rawResponse     Json?
+  requestedAt     DateTime       @default(now())
+  respondedAt     DateTime?
+
+  application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  @@index([applicationId])
+  @@map("bureau_checks")
+}
+
+/// Result of a KYC verification attempt for an application.
+model KycVerification {
+  id              String                @id @default(cuid())
+  applicationId   String
+  methodName      KycMethodName
+  status          KycVerificationStatus @default(PENDING)
+  verificationId  String?               // external ref from KYC provider
+  errorMessage    String?
+  initiatedAt     DateTime              @default(now())
+  completedAt     DateTime?
+
+  application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  @@index([applicationId])
+  @@map("kyc_verifications")
+}

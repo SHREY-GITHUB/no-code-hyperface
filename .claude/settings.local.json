@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//Users/shrey/Desktop/**)",
+      "Bash(npm create:*)",
+      "Read(//usr/local/bin/**)",
+      "Read(//Users/shrey/.nvm/versions/**)"
+    ]
+  }
+}
