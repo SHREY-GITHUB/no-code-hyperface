@@ -17,11 +17,11 @@ function PanelCard({ children }) {
     <div
       className="h-full overflow-hidden"
       style={{
-        backgroundColor: '#F8FAFC',
-        borderRadius: '12px 12px 0 0',
-        border: '1px solid #E2E8F0',
+        backgroundColor: '#FFFFFF',
+        borderRadius: '14px 14px 0 0',
+        border: '1px solid #E8EDF4',
         borderBottom: 'none',
-        boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.06), 0 0 0 1px rgba(255,255,255,0.8) inset',
       }}
     >
       {children}
@@ -141,7 +141,13 @@ export default function MiddlePanel({
       {/* Top bar */}
       <div
         className="middle-topbar flex items-center justify-between shrink-0"
-        style={{ height: 56, backgroundColor: '#FFFFFF', borderBottom: '1px solid #E2E8F0' }}
+        style={{
+          height: 58,
+          backgroundColor: 'rgba(255,255,255,0.95)',
+          backdropFilter: 'blur(8px)',
+          borderBottom: '1px solid #E8EDF4',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+        }}
       >
         <div className="flex items-center gap-2.5" style={{ minWidth: 0 }}>
           {/* Hamburger — mobile only */}
@@ -171,14 +177,14 @@ export default function MiddlePanel({
 
         {/* Right side actions */}
         <div className="flex items-center gap-2 shrink-0">
-          <span
-            style={{
-              fontSize: 12, fontWeight: 500, color: '#D97706',
-              backgroundColor: '#FEF3C7', borderRadius: 6, padding: '3px 10px',
-              whiteSpace: 'nowrap',
-            }}
-          >
-            Draft
+          <span style={{
+            fontSize: 11, fontWeight: 700, color: '#B45309',
+            backgroundColor: '#FEF3C7',
+            border: '1px solid #FDE68A',
+            borderRadius: 20, padding: '3px 10px',
+            whiteSpace: 'nowrap', letterSpacing: '0.02em',
+          }}>
+            ◌ Draft
           </span>
           {scenarioActive && (
             <div className="scenario-text" style={{ alignItems: 'center', gap: 5 }}>
