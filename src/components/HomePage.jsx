@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 
 // ─── Program catalogue ────────────────────────────────────────────────────────
 
@@ -84,9 +84,223 @@ const STATS = [
   },
 ]
 
+// ─── New Program Modal ────────────────────────────────────────────────────────
+
+function NewProgramModal({ onClose, onCreate }) {
+  const [name, setName]           = useState('')
+  const [description, setDesc]    = useState('')
+  const [nameError, setNameError] = useState(false)
+  const nameRef = useRef(null)
+
+  /* Focus name field on open */
+  useEffect(() => {
+    const t = setTimeout(() => nameRef.current?.focus(), 60)
+    return () => clearTimeout(t)
+  }, [])
+
+  /* Close on Escape */
+  useEffect(() => {
+    function handler(e) { if (e.key === 'Escape') onClose() }
+    document.addEventListener('keydown', handler)
+    return () => document.removeEventListener('keydown', handler)
+  }, [onClose])
+
+  function handleCreate() {
+    if (!name.trim()) { setNameError(true); nameRef.current?.focus(); return }
+    onCreate({ name: name.trim(), description: description.trim() })
+  }
+
+  return (
+    /* Backdrop */
+    <div
+      onClick={onClose}
+      style={{
+        position: 'fixed', inset: 0, zIndex: 800,
+        backgroundColor: 'rgba(0,0,0,0.35)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        padding: '20px',
+        animation: 'fadeIn 0.18s ease-out',
+      }}
+    >
+      {/* Modal box */}
+      <div
+        onClick={e => e.stopPropagation()}
+        style={{
+          width: '100%', maxWidth: 460,
+          backgroundColor: '#FFFFFF',
+          borderRadius: 16,
+          border: '1px solid #E5E7EB',
+          boxShadow: '0 20px 60px rgba(0,0,0,0.14), 0 4px 16px rgba(0,0,0,0.07)',
+          overflow: 'hidden',
+          animation: 'fadeSlideUp 0.2s ease-out',
+        }}
+      >
+        {/* Header */}
+        <div style={{
+          padding: '22px 24px 18px',
+          borderBottom: '1px solid #F3F4F6',
+          display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12,
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div style={{
+              width: 38, height: 38, borderRadius: 10,
+              background: 'linear-gradient(135deg, #3B82F6 0%, #2563EB 100%)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+              boxShadow: '0 2px 8px rgba(37,99,235,0.25)',
+            }}>
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M8 2v12M2 8h12" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+            </div>
+            <div>
+              <h2 style={{ fontSize: 16, fontWeight: 700, color: '#111827', margin: 0, letterSpacing: '-0.2px' }}>
+                Create New Program
+              </h2>
+              <p style={{ fontSize: 12, color: '#9CA3AF', margin: '2px 0 0', fontWeight: 400 }}>
+                Set up a new credit card onboarding journey
+              </p>
+            </div>
+          </div>
+
+          {/* Close button */}
+          <button
+            onClick={onClose}
+            style={{
+              width: 30, height: 30, borderRadius: 7, border: '1px solid #E5E7EB',
+              backgroundColor: '#F9FAFB', cursor: 'pointer', color: '#6B7280',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+            }}
+            onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#F3F4F6'; e.currentTarget.style.color = '#374151' }}
+            onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#F9FAFB'; e.currentTarget.style.color = '#6B7280' }}
+          >
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+              <path d="M2 2l8 8M10 2l-8 8" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/>
+            </svg>
+          </button>
+        </div>
+
+        {/* Form */}
+        <div style={{ padding: '20px 24px' }}>
+
+          {/* Program Name */}
+          <div style={{ marginBottom: 16 }}>
+            <label style={{
+              display: 'block', fontSize: 12, fontWeight: 600,
+              color: '#374151', marginBottom: 6, letterSpacing: '-0.1px',
+            }}>
+              Program Name <span style={{ color: '#EF4444' }}>*</span>
+            </label>
+            <input
+              ref={nameRef}
+              type="text"
+              value={name}
+              onChange={e => { setName(e.target.value); if (e.target.value.trim()) setNameError(false) }}
+              onKeyDown={e => { if (e.key === 'Enter') handleCreate() }}
+              placeholder="e.g. HDFC Millennia Card Program"
+              style={{
+                width: '100%', height: 40,
+                border: `1.5px solid ${nameError ? '#EF4444' : '#E5E7EB'}`,
+                borderRadius: 8, padding: '0 12px',
+                fontSize: 13.5, color: '#111827',
+                backgroundColor: nameError ? '#FFF5F5' : '#FFFFFF',
+                outline: 'none', fontFamily: 'inherit',
+                transition: 'border-color 0.15s, background-color 0.15s',
+                boxSizing: 'border-box',
+              }}
+              onFocus={e => { if (!nameError) e.target.style.borderColor = '#3B82F6' }}
+              onBlur={e => { if (!nameError) e.target.style.borderColor = '#E5E7EB' }}
+            />
+            {nameError && (
+              <p style={{ fontSize: 11.5, color: '#EF4444', margin: '5px 0 0', fontWeight: 500 }}>
+                Program name is required
+              </p>
+            )}
+          </div>
+
+          {/* Description */}
+          <div style={{ marginBottom: 24 }}>
+            <label style={{
+              display: 'block', fontSize: 12, fontWeight: 600,
+              color: '#374151', marginBottom: 6, letterSpacing: '-0.1px',
+            }}>
+              Description <span style={{ fontSize: 11, color: '#9CA3AF', fontWeight: 400 }}>(optional)</span>
+            </label>
+            <textarea
+              value={description}
+              onChange={e => setDesc(e.target.value)}
+              placeholder="Brief description of this card program and its target audience…"
+              rows={3}
+              style={{
+                width: '100%',
+                border: '1.5px solid #E5E7EB',
+                borderRadius: 8, padding: '10px 12px',
+                fontSize: 13, color: '#111827',
+                backgroundColor: '#FFFFFF',
+                outline: 'none', fontFamily: 'inherit',
+                resize: 'none', lineHeight: 1.55,
+                transition: 'border-color 0.15s',
+                boxSizing: 'border-box',
+              }}
+              onFocus={e => { e.target.style.borderColor = '#3B82F6' }}
+              onBlur={e => { e.target.style.borderColor = '#E5E7EB' }}
+            />
+          </div>
+
+          {/* Actions */}
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button
+              onClick={onClose}
+              style={{
+                flex: 1, height: 38, fontSize: 13, fontWeight: 500,
+                color: '#6B7280', border: '1px solid #E5E7EB',
+                borderRadius: 8, backgroundColor: '#FFFFFF',
+                cursor: 'pointer', fontFamily: 'inherit',
+                transition: 'all 0.15s',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#F9FAFB'; e.currentTarget.style.borderColor = '#D1D5DB' }}
+              onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#FFFFFF'; e.currentTarget.style.borderColor = '#E5E7EB' }}
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleCreate}
+              style={{
+                flex: 2, height: 38, fontSize: 13, fontWeight: 600,
+                color: '#FFFFFF', border: 'none',
+                borderRadius: 8,
+                background: 'linear-gradient(135deg, #3B82F6 0%, #2563EB 100%)',
+                cursor: 'pointer', fontFamily: 'inherit',
+                boxShadow: '0 2px 8px rgba(37,99,235,0.22)',
+                transition: 'transform 0.15s, box-shadow 0.15s',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+              }}
+              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(37,99,235,0.32)' }}
+              onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 2px 8px rgba(37,99,235,0.22)' }}
+            >
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                <path d="M6.5 1.5v10M1.5 6.5h10" stroke="white" strokeWidth="1.8" strokeLinecap="round"/>
+              </svg>
+              Create Program
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ─── Root export ──────────────────────────────────────────────────────────────
 
 export default function HomePage({ onOpen }) {
+  const [showNewModal, setShowNewModal] = useState(false)
+
+  function handleCreate({ name, description }) {
+    // In a real app you'd persist name/description; for now open the editor
+    console.log('Creating program:', { name, description })
+    setShowNewModal(false)
+    onOpen('hdfc')
+  }
+
   return (
     <div style={{
       display: 'flex', flexDirection: 'column',
@@ -95,7 +309,7 @@ export default function HomePage({ onOpen }) {
       fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
     }}>
 
-      {/* ── Top bar ──────────────────────────────────────── */}
+      {/* ── Top bar ──────────────────────────────────────────── */}
       <div className="home-topbar" style={{
         height: 58, flexShrink: 0,
         backgroundColor: '#FFFFFF',
@@ -121,51 +335,30 @@ export default function HomePage({ onOpen }) {
           </div>
         </div>
 
-        {/* Actions */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-          <button
-            className="home-topbar-actlog"
-            style={{
-              display: 'flex', alignItems: 'center', gap: 6,
-              fontSize: 12.5, fontWeight: 500, color: '#6B7280',
-              border: '1px solid #E5E7EB', borderRadius: 7,
-              padding: '6px 12px', backgroundColor: '#FFFFFF', cursor: 'pointer',
-              fontFamily: 'inherit', transition: 'all 0.15s',
-            }}
-            onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#F9FAFB'; e.currentTarget.style.borderColor = '#D1D5DB'; e.currentTarget.style.color = '#374151' }}
-            onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#FFFFFF'; e.currentTarget.style.borderColor = '#E5E7EB'; e.currentTarget.style.color = '#6B7280' }}
-          >
-            <svg width="13" height="13" viewBox="0 0 14 14" fill="none">
-              <circle cx="7" cy="7" r="5.5" stroke="currentColor" strokeWidth="1.3"/>
-              <path d="M7 4.5V7l1.5 1.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
-            </svg>
-            Activity Log
-          </button>
-
-          <button
-            onClick={() => onOpen('hdfc')}
-            style={{
-              display: 'flex', alignItems: 'center', gap: 6,
-              fontSize: 12.5, fontWeight: 600, color: '#fff',
-              border: 'none', borderRadius: 7,
-              padding: '7px 14px',
-              background: 'linear-gradient(135deg, #3B82F6 0%, #2563EB 100%)',
-              cursor: 'pointer', fontFamily: 'inherit',
-              boxShadow: '0 2px 8px rgba(37,99,235,0.22)',
-              transition: 'transform 0.15s, box-shadow 0.15s',
-            }}
-            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(37,99,235,0.32)' }}
-            onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 2px 8px rgba(37,99,235,0.22)' }}
-          >
-            <svg width="12" height="12" viewBox="0 0 13 13" fill="none">
-              <path d="M6.5 1.5v10M1.5 6.5h10" stroke="white" strokeWidth="1.8" strokeLinecap="round"/>
-            </svg>
-            New Program
-          </button>
-        </div>
+        {/* New Program button only */}
+        <button
+          onClick={() => setShowNewModal(true)}
+          style={{
+            display: 'flex', alignItems: 'center', gap: 6,
+            fontSize: 12.5, fontWeight: 600, color: '#fff',
+            border: 'none', borderRadius: 7,
+            padding: '7px 14px',
+            background: 'linear-gradient(135deg, #3B82F6 0%, #2563EB 100%)',
+            cursor: 'pointer', fontFamily: 'inherit',
+            boxShadow: '0 2px 8px rgba(37,99,235,0.22)',
+            transition: 'transform 0.15s, box-shadow 0.15s',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(37,99,235,0.32)' }}
+          onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 2px 8px rgba(37,99,235,0.22)' }}
+        >
+          <svg width="12" height="12" viewBox="0 0 13 13" fill="none">
+            <path d="M6.5 1.5v10M1.5 6.5h10" stroke="white" strokeWidth="1.8" strokeLinecap="round"/>
+          </svg>
+          New Program
+        </button>
       </div>
 
-      {/* ── Scrollable body ───────────────────────────────── */}
+      {/* ── Scrollable body ───────────────────────────────────── */}
       <div className="home-body" style={{ flex: 1, overflowY: 'auto' }}>
 
         {/* Hero */}
@@ -183,9 +376,7 @@ export default function HomePage({ onOpen }) {
 
         {/* Stats row */}
         <div className="home-stats-grid" style={{ marginBottom: 36 }}>
-          {STATS.map((s, i) => (
-            <StatCard key={i} stat={s} />
-          ))}
+          {STATS.map((s, i) => <StatCard key={i} stat={s} />)}
         </div>
 
         {/* Programs header */}
@@ -212,13 +403,21 @@ export default function HomePage({ onOpen }) {
         {/* Programs grid */}
         <div className="home-programs-grid">
           {PROGRAMS.map(prog => <ProgramCard key={prog.id} prog={prog} onOpen={onOpen} />)}
-          <CreateCard onOpen={onOpen} />
+          <CreateCard onClick={() => setShowNewModal(true)} />
         </div>
 
         <p style={{ fontSize: 11, color: '#D1D5DB', textAlign: 'center', marginTop: 44, paddingBottom: 8 }}>
           Hyperface Studio · No-Code LOS Configurator · v2.4.0
         </p>
       </div>
+
+      {/* New Program Modal */}
+      {showNewModal && (
+        <NewProgramModal
+          onClose={() => setShowNewModal(false)}
+          onCreate={handleCreate}
+        />
+      )}
     </div>
   )
 }
@@ -238,27 +437,17 @@ function StatCard({ stat: s }) {
         transition: 'transform 0.15s, box-shadow 0.15s',
         cursor: 'default',
       }}
-      onMouseEnter={e => {
-        e.currentTarget.style.transform = 'translateY(-2px)'
-        e.currentTarget.style.boxShadow = '0 4px 16px rgba(0,0,0,0.07)'
-      }}
-      onMouseLeave={e => {
-        e.currentTarget.style.transform = 'translateY(0)'
-        e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.04)'
-      }}
+      onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 4px 16px rgba(0,0,0,0.07)' }}
+      onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.04)' }}
     >
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <p style={{
-          fontSize: 11, fontWeight: 600, color: '#9CA3AF',
-          textTransform: 'uppercase', letterSpacing: '0.07em', margin: 0,
-        }}>
+        <p style={{ fontSize: 11, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.07em', margin: 0 }}>
           {s.label}
         </p>
         <div style={{
           width: 34, height: 34, borderRadius: 9,
           backgroundColor: s.accentBg, color: s.accent,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          border: `1px solid ${s.accentBg}`,
         }}>
           {s.icon}
         </div>
@@ -309,35 +498,24 @@ function ProgramCard({ prog, onOpen }) {
       }}
     >
       {/* Accent top bar */}
-      <div style={{
-        height: 4,
-        background: `linear-gradient(90deg, ${prog.gradFrom} 0%, ${prog.gradTo} 100%)`,
-      }} />
+      <div style={{ height: 4, background: `linear-gradient(90deg, ${prog.gradFrom} 0%, ${prog.gradTo} 100%)` }} />
 
       <div style={{ padding: '18px 20px 20px' }}>
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, marginBottom: 16 }}>
-          {/* Logo chip */}
           <div style={{
             width: 40, height: 40, borderRadius: 10, flexShrink: 0,
-            backgroundColor: prog.bg,
-            border: `1px solid ${prog.gradFrom}30`,
+            backgroundColor: prog.bg, border: `1px solid ${prog.gradFrom}30`,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
             <span style={{ fontSize: 16, fontWeight: 800, color: prog.color }}>{prog.initial}</span>
           </div>
-
           <div style={{ flex: 1, minWidth: 0 }}>
-            <p style={{
-              fontSize: 14, fontWeight: 700, color: '#111827',
-              margin: '0 0 3px', lineHeight: 1.3, letterSpacing: '-0.1px',
-            }}>
+            <p style={{ fontSize: 14, fontWeight: 700, color: '#111827', margin: '0 0 3px', lineHeight: 1.3, letterSpacing: '-0.1px' }}>
               {prog.name}
             </p>
             <p style={{ fontSize: 12, color: '#9CA3AF', margin: 0, fontWeight: 500 }}>{prog.bank}</p>
           </div>
-
-          {/* Status badge */}
           <span style={{
             fontSize: 10, fontWeight: 700, flexShrink: 0,
             color: isLive ? '#065F46' : '#78350F',
@@ -348,15 +526,13 @@ function ProgramCard({ prog, onOpen }) {
           }}>
             <span style={{
               width: 5.5, height: 5.5, borderRadius: '50%',
-              backgroundColor: isLive ? '#10B981' : '#D97706',
-              display: 'inline-block',
+              backgroundColor: isLive ? '#10B981' : '#D97706', display: 'inline-block',
               animation: isLive ? 'livePulse 2s ease-in-out infinite' : 'none',
             }} />
             {prog.status}
           </span>
         </div>
 
-        {/* Divider */}
         <div style={{ height: 1, backgroundColor: '#F3F4F6', marginBottom: 14 }} />
 
         {/* Metrics */}
@@ -368,10 +544,7 @@ function ProgramCard({ prog, onOpen }) {
             { label: 'Last Modified',     value: prog.lastModified },
           ].map((m, i) => (
             <div key={i}>
-              <p style={{
-                fontSize: 10, color: '#9CA3AF', fontWeight: 600, margin: '0 0 3px',
-                textTransform: 'uppercase', letterSpacing: '0.06em',
-              }}>
+              <p style={{ fontSize: 10, color: '#9CA3AF', fontWeight: 600, margin: '0 0 3px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
                 {m.label}
               </p>
               <p style={{ fontSize: 13, fontWeight: 700, color: '#1F2937', margin: 0 }}>{m.value}</p>
@@ -384,13 +557,11 @@ function ProgramCard({ prog, onOpen }) {
           <button
             onClick={() => onOpen(prog.id)}
             style={{
-              flex: 1, height: 36, fontSize: 12.5, fontWeight: 600,
-              color: '#fff',
+              flex: 1, height: 36, fontSize: 12.5, fontWeight: 600, color: '#fff',
               background: `linear-gradient(135deg, ${prog.gradFrom} 0%, ${prog.gradTo} 100%)`,
               border: 'none', borderRadius: 8, cursor: 'pointer',
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5,
-              fontFamily: 'inherit',
-              boxShadow: `0 2px 8px ${prog.color}25`,
+              fontFamily: 'inherit', boxShadow: `0 2px 8px ${prog.color}25`,
               transition: 'transform 0.15s, box-shadow 0.15s',
             }}
             onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = `0 4px 14px ${prog.color}40` }}
@@ -402,12 +573,10 @@ function ProgramCard({ prog, onOpen }) {
             </svg>
           </button>
 
-          {/* Analytics icon btn */}
           <button title="Analytics" style={{
             width: 36, height: 36, border: '1px solid #E5E7EB', borderRadius: 8,
             backgroundColor: '#F9FAFB', cursor: 'pointer', color: '#9CA3AF',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            transition: 'all 0.15s',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.15s',
           }}
           onMouseEnter={e => { e.currentTarget.style.backgroundColor = prog.bg; e.currentTarget.style.borderColor = prog.gradFrom + '50'; e.currentTarget.style.color = prog.color }}
           onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#F9FAFB'; e.currentTarget.style.borderColor = '#E5E7EB'; e.currentTarget.style.color = '#9CA3AF' }}
@@ -419,12 +588,10 @@ function ProgramCard({ prog, onOpen }) {
             </svg>
           </button>
 
-          {/* More icon btn */}
           <button title="More options" style={{
             width: 36, height: 36, border: '1px solid #E5E7EB', borderRadius: 8,
             backgroundColor: '#F9FAFB', cursor: 'pointer', color: '#9CA3AF',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            transition: 'all 0.15s',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.15s',
           }}
           onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#F3F4F6'; e.currentTarget.style.borderColor = '#D1D5DB'; e.currentTarget.style.color = '#6B7280' }}
           onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#F9FAFB'; e.currentTarget.style.borderColor = '#E5E7EB'; e.currentTarget.style.color = '#9CA3AF' }}
@@ -443,11 +610,11 @@ function ProgramCard({ prog, onOpen }) {
 
 // ─── Create new card ──────────────────────────────────────────────────────────
 
-function CreateCard({ onOpen }) {
+function CreateCard({ onClick }) {
   const [hovered, setHovered] = useState(false)
   return (
     <button
-      onClick={() => onOpen('hdfc')}
+      onClick={onClick}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
@@ -457,18 +624,14 @@ function CreateCard({ onOpen }) {
         padding: '32px 20px',
         cursor: 'pointer',
         display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 14,
-        transition: 'all 0.2s',
-        textAlign: 'center',
-        fontFamily: 'inherit',
+        transition: 'all 0.2s', textAlign: 'center', fontFamily: 'inherit',
         minHeight: 220,
         boxShadow: hovered ? '0 4px 16px rgba(37,99,235,0.06)' : 'none',
       }}
     >
       <div style={{
         width: 48, height: 48, borderRadius: 12,
-        background: hovered
-          ? 'linear-gradient(135deg, #DBEAFE 0%, #EFF6FF 100%)'
-          : '#F3F4F6',
+        background: hovered ? 'linear-gradient(135deg, #DBEAFE 0%, #EFF6FF 100%)' : '#F3F4F6',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         transition: 'all 0.2s',
         boxShadow: hovered ? '0 4px 12px rgba(37,99,235,0.12)' : 'none',
