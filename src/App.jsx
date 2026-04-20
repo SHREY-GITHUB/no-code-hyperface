@@ -7,6 +7,28 @@ import DemoControlsPanel from './components/DemoControlsPanel'
 import HomePage from './components/HomePage'
 import PublishModal from './components/PublishModal'
 
+/* ─── Initial program catalogue (source of truth) ───────────────────────── */
+const INITIAL_PROGRAMS = [
+  {
+    id: 'hdfc', name: 'HDFC Millenia Card Program', bank: 'HDFC Bank',
+    status: 'Draft', stages: 4, enabledStages: 4, lastModified: 'Today, 2:14 PM',
+    color: '#2563EB', gradFrom: '#3B82F6', gradTo: '#1D4ED8', bg: '#EFF6FF', initial: 'H',
+    applications: '1,247', conversion: '56.0%',
+  },
+  {
+    id: 'slice', name: 'Slice Student Credit Card', bank: 'Slice Fintech',
+    status: 'Live', stages: 4, enabledStages: 3, lastModified: 'Yesterday, 11:30 AM',
+    color: '#7C3AED', gradFrom: '#8B5CF6', gradTo: '#6D28D9', bg: '#F5F3FF', initial: 'S',
+    applications: '3,821', conversion: '61.2%',
+  },
+  {
+    id: 'jupiter', name: 'Jupiter Edge Card', bank: 'Jupiter / Federal Bank',
+    status: 'Live', stages: 4, enabledStages: 4, lastModified: 'Apr 10, 2026',
+    color: '#059669', gradFrom: '#10B981', gradTo: '#047857', bg: '#ECFDF5', initial: 'J',
+    applications: '2,156', conversion: '58.4%',
+  },
+]
+
 const initialStages = [
   { id: 1, name: 'Application Form',     enabled: true },
   { id: 2, name: 'Bureau & Decisioning', enabled: true },
@@ -41,16 +63,24 @@ export default function App() {
   const [analyticsOpen, setAnalyticsOpen] = useState(false)
   const [clientId, setClientId]         = useState('hdfc')
   const [menuOpen, setMenuOpen]         = useState(false)
+  const [programs, setPrograms]         = useState(INITIAL_PROGRAMS)
+  const [activeProgramName, setActiveProgramName] = useState(null)
   const [demoControls, setDemoControls] = useState({
     bureauFailure: false,
     manualReview: false,
     lowScoreDecline: false,
   })
 
-  /* Open editor for a specific client */
-  function openEditor(id) {
+  /* Open editor — clientId is the journey template ('hdfc'|'slice'|'jupiter'),
+     customName overrides the breadcrumb label (used for user-created programs). */
+  function openEditor(id, customName = null) {
     setClientId(id)
+    setActiveProgramName(customName)
     setHomePage(false)
+  }
+
+  function addProgram(prog) {
+    setPrograms(ps => [...ps, prog])
   }
 
   /* Close drawer when a stage is selected on mobile */
@@ -60,7 +90,7 @@ export default function App() {
   }
 
   if (homePage) {
-    return <HomePage onOpen={openEditor} />
+    return <HomePage onOpen={openEditor} programs={programs} onAddProgram={addProgram} />
   }
 
   return (
@@ -110,6 +140,7 @@ export default function App() {
           kycMethods={kycMethods} setKycMethods={setKycMethods}
           onPreviewClick={() => setPreviewOpen(true)}
           clientId={clientId} setClientId={setClientId}
+          programName={activeProgramName}
           demoControls={demoControls}
           analyticsOpen={analyticsOpen} setAnalyticsOpen={setAnalyticsOpen}
           onMenuOpen={() => setMenuOpen(true)}

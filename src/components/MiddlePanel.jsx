@@ -113,7 +113,7 @@ function ClientSelector({ clientId, setClientId }) {
 /* ─── Main component ─────────────────────────────────────── */
 export default function MiddlePanel({
   selectedStage, fields, setFields, kycMethods, setKycMethods,
-  onPreviewClick, clientId, setClientId, demoControls,
+  onPreviewClick, clientId, setClientId, programName, demoControls,
   analyticsOpen, setAnalyticsOpen, onMenuOpen,
 }) {
   const scenarioActive = demoControls && Object.values(demoControls).some(Boolean)
@@ -172,7 +172,13 @@ export default function MiddlePanel({
             <svg className="hidden sm:block" width="12" height="12" viewBox="0 0 12 12" fill="none">
               <path d="M4.5 3L7.5 6L4.5 9" stroke="#D1D5DB" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
-            <ClientSelector clientId={clientId} setClientId={setClientId} />
+            {programName ? (
+              <span style={{ fontSize: 13, fontWeight: 600, color: '#374151', whiteSpace: 'nowrap' }}>
+                {programName}
+              </span>
+            ) : (
+              <ClientSelector clientId={clientId} setClientId={setClientId} />
+            )}
             {selectedStage && !analyticsOpen && (
               <>
                 <svg className="hidden sm:block" width="12" height="12" viewBox="0 0 12 12" fill="none">

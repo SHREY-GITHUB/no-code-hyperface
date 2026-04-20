@@ -1,46 +1,21 @@
 import { useState, useRef, useEffect } from 'react'
 
-// ─── Program catalogue ────────────────────────────────────────────────────────
+// ─── Color presets ────────────────────────────────────────────────────────────
 
-const PROGRAMS = [
-  {
-    id: 'hdfc',
-    name: 'HDFC Millenia Card Program',
-    bank: 'HDFC Bank',
-    status: 'Draft',
-    stages: 4, enabledStages: 4,
-    lastModified: 'Today, 2:14 PM',
-    color: '#2563EB', gradFrom: '#3B82F6', gradTo: '#1D4ED8',
-    bg: '#EFF6FF', initial: 'H',
-    applications: '1,247', conversion: '56.0%',
-  },
-  {
-    id: 'slice',
-    name: 'Slice Student Credit Card',
-    bank: 'Slice Fintech',
-    status: 'Live',
-    stages: 4, enabledStages: 3,
-    lastModified: 'Yesterday, 11:30 AM',
-    color: '#7C3AED', gradFrom: '#8B5CF6', gradTo: '#6D28D9',
-    bg: '#F5F3FF', initial: 'S',
-    applications: '3,821', conversion: '61.2%',
-  },
-  {
-    id: 'jupiter',
-    name: 'Jupiter Edge Card',
-    bank: 'Jupiter / Federal Bank',
-    status: 'Live',
-    stages: 4, enabledStages: 4,
-    lastModified: 'Apr 10, 2026',
-    color: '#059669', gradFrom: '#10B981', gradTo: '#047857',
-    bg: '#ECFDF5', initial: 'J',
-    applications: '2,156', conversion: '58.4%',
-  },
+const COLOR_PRESETS = [
+  { label: 'Blue',   color: '#2563EB', gradFrom: '#3B82F6', gradTo: '#1D4ED8', bg: '#EFF6FF' },
+  { label: 'Purple', color: '#7C3AED', gradFrom: '#8B5CF6', gradTo: '#6D28D9', bg: '#F5F3FF' },
+  { label: 'Green',  color: '#059669', gradFrom: '#10B981', gradTo: '#047857', bg: '#ECFDF5' },
+  { label: 'Orange', color: '#D97706', gradFrom: '#F59E0B', gradTo: '#B45309', bg: '#FFFBEB' },
+  { label: 'Red',    color: '#DC2626', gradFrom: '#EF4444', gradTo: '#B91C1C', bg: '#FEF2F2' },
+  { label: 'Teal',   color: '#0891B2', gradFrom: '#06B6D4', gradTo: '#0E7490', bg: '#ECFEFF' },
 ]
 
-const STATS = [
+// ─── Stats ────────────────────────────────────────────────────────────────────
+
+const STATS_BASE = [
   {
-    label: 'Total Programs', value: '3', sub: 'configured',
+    label: 'Total Programs', valueKey: 'totalPrograms', sub: 'configured',
     icon: (
       <svg width="17" height="17" viewBox="0 0 18 18" fill="none">
         <rect x="1" y="1" width="6.5" height="6.5" rx="1.5" fill="currentColor" opacity="0.9"/>
@@ -52,7 +27,7 @@ const STATS = [
     accent: '#2563EB', accentBg: '#EFF6FF',
   },
   {
-    label: 'Live Journeys', value: '2', sub: 'actively running',
+    label: 'Live Journeys', valueKey: 'liveJourneys', sub: 'actively running',
     icon: (
       <svg width="17" height="17" viewBox="0 0 18 18" fill="none">
         <circle cx="9" cy="9" r="7.5" stroke="currentColor" strokeWidth="1.5" opacity="0.25"/>
@@ -87,18 +62,17 @@ const STATS = [
 // ─── New Program Modal ────────────────────────────────────────────────────────
 
 function NewProgramModal({ onClose, onCreate }) {
-  const [name, setName]           = useState('')
-  const [description, setDesc]    = useState('')
-  const [nameError, setNameError] = useState(false)
+  const [name, setName]                   = useState('')
+  const [description, setDesc]            = useState('')
+  const [nameError, setNameError]         = useState(false)
+  const [selectedColor, setSelectedColor] = useState(COLOR_PRESETS[0])
   const nameRef = useRef(null)
 
-  /* Focus name field on open */
   useEffect(() => {
     const t = setTimeout(() => nameRef.current?.focus(), 60)
     return () => clearTimeout(t)
   }, [])
 
-  /* Close on Escape */
   useEffect(() => {
     function handler(e) { if (e.key === 'Escape') onClose() }
     document.addEventListener('keydown', handler)
@@ -107,11 +81,10 @@ function NewProgramModal({ onClose, onCreate }) {
 
   function handleCreate() {
     if (!name.trim()) { setNameError(true); nameRef.current?.focus(); return }
-    onCreate({ name: name.trim(), description: description.trim() })
+    onCreate({ name: name.trim(), description: description.trim(), color: selectedColor })
   }
 
   return (
-    /* Backdrop */
     <div
       onClick={onClose}
       style={{
@@ -122,11 +95,10 @@ function NewProgramModal({ onClose, onCreate }) {
         animation: 'fadeIn 0.18s ease-out',
       }}
     >
-      {/* Modal box */}
       <div
         onClick={e => e.stopPropagation()}
         style={{
-          width: '100%', maxWidth: 460,
+          width: '100%', maxWidth: 480,
           backgroundColor: '#FFFFFF',
           borderRadius: 16,
           border: '1px solid #E5E7EB',
@@ -144,9 +116,10 @@ function NewProgramModal({ onClose, onCreate }) {
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <div style={{
               width: 38, height: 38, borderRadius: 10,
-              background: 'linear-gradient(135deg, #3B82F6 0%, #2563EB 100%)',
+              background: `linear-gradient(135deg, ${selectedColor.gradFrom} 0%, ${selectedColor.gradTo} 100%)`,
               display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-              boxShadow: '0 2px 8px rgba(37,99,235,0.25)',
+              boxShadow: `0 2px 8px ${selectedColor.color}33`,
+              transition: 'background 0.2s, box-shadow 0.2s',
             }}>
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                 <path d="M8 2v12M2 8h12" stroke="white" strokeWidth="2" strokeLinecap="round"/>
@@ -161,8 +134,6 @@ function NewProgramModal({ onClose, onCreate }) {
               </p>
             </div>
           </div>
-
-          {/* Close button */}
           <button
             onClick={onClose}
             style={{
@@ -218,7 +189,7 @@ function NewProgramModal({ onClose, onCreate }) {
           </div>
 
           {/* Description */}
-          <div style={{ marginBottom: 24 }}>
+          <div style={{ marginBottom: 18 }}>
             <label style={{
               display: 'block', fontSize: 12, fontWeight: 600,
               color: '#374151', marginBottom: 6, letterSpacing: '-0.1px',
@@ -229,7 +200,7 @@ function NewProgramModal({ onClose, onCreate }) {
               value={description}
               onChange={e => setDesc(e.target.value)}
               placeholder="Brief description of this card program and its target audience…"
-              rows={3}
+              rows={2}
               style={{
                 width: '100%',
                 border: '1.5px solid #E5E7EB',
@@ -244,6 +215,58 @@ function NewProgramModal({ onClose, onCreate }) {
               onFocus={e => { e.target.style.borderColor = '#3B82F6' }}
               onBlur={e => { e.target.style.borderColor = '#E5E7EB' }}
             />
+          </div>
+
+          {/* Color scheme picker */}
+          <div style={{ marginBottom: 22 }}>
+            <label style={{
+              display: 'block', fontSize: 12, fontWeight: 600,
+              color: '#374151', marginBottom: 10, letterSpacing: '-0.1px',
+            }}>
+              Color Scheme
+            </label>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              {COLOR_PRESETS.map(preset => {
+                const active = preset.color === selectedColor.color
+                return (
+                  <button
+                    key={preset.color}
+                    title={preset.label}
+                    onClick={() => setSelectedColor(preset)}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: 7,
+                      padding: '6px 12px',
+                      borderRadius: 8,
+                      border: `1.5px solid ${active ? preset.color : '#E5E7EB'}`,
+                      backgroundColor: active ? preset.bg : '#FFFFFF',
+                      cursor: 'pointer',
+                      fontFamily: 'inherit',
+                      transition: 'all 0.15s',
+                      boxShadow: active ? `0 2px 8px ${preset.color}22` : 'none',
+                    }}
+                    onMouseEnter={e => { if (!active) { e.currentTarget.style.borderColor = preset.color + '80'; e.currentTarget.style.backgroundColor = preset.bg } }}
+                    onMouseLeave={e => { if (!active) { e.currentTarget.style.borderColor = '#E5E7EB'; e.currentTarget.style.backgroundColor = '#FFFFFF' } }}
+                  >
+                    <span style={{
+                      width: 12, height: 12, borderRadius: '50%', flexShrink: 0,
+                      background: `linear-gradient(135deg, ${preset.gradFrom}, ${preset.gradTo})`,
+                      boxShadow: active ? `0 1px 4px ${preset.color}55` : 'none',
+                    }} />
+                    <span style={{
+                      fontSize: 11.5, fontWeight: active ? 600 : 500,
+                      color: active ? preset.color : '#6B7280',
+                    }}>
+                      {preset.label}
+                    </span>
+                    {active && (
+                      <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                        <path d="M1.5 5l2.5 2.5 4.5-4.5" stroke={preset.color} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    )}
+                  </button>
+                )
+              })}
+            </div>
           </div>
 
           {/* Actions */}
@@ -268,14 +291,14 @@ function NewProgramModal({ onClose, onCreate }) {
                 flex: 2, height: 38, fontSize: 13, fontWeight: 600,
                 color: '#FFFFFF', border: 'none',
                 borderRadius: 8,
-                background: 'linear-gradient(135deg, #3B82F6 0%, #2563EB 100%)',
+                background: `linear-gradient(135deg, ${selectedColor.gradFrom} 0%, ${selectedColor.gradTo} 100%)`,
                 cursor: 'pointer', fontFamily: 'inherit',
-                boxShadow: '0 2px 8px rgba(37,99,235,0.22)',
-                transition: 'transform 0.15s, box-shadow 0.15s',
+                boxShadow: `0 2px 8px ${selectedColor.color}33`,
+                transition: 'transform 0.15s, box-shadow 0.15s, background 0.2s',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
               }}
-              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(37,99,235,0.32)' }}
-              onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 2px 8px rgba(37,99,235,0.22)' }}
+              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = `0 4px 14px ${selectedColor.color}44` }}
+              onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = `0 2px 8px ${selectedColor.color}33` }}
             >
               <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
                 <path d="M6.5 1.5v10M1.5 6.5h10" stroke="white" strokeWidth="1.8" strokeLinecap="round"/>
@@ -291,14 +314,37 @@ function NewProgramModal({ onClose, onCreate }) {
 
 // ─── Root export ──────────────────────────────────────────────────────────────
 
-export default function HomePage({ onOpen }) {
+export default function HomePage({ onOpen, programs, onAddProgram }) {
   const [showNewModal, setShowNewModal] = useState(false)
 
-  function handleCreate({ name, description }) {
-    // In a real app you'd persist name/description; for now open the editor
-    console.log('Creating program:', { name, description })
+  /* Derive stats dynamically from programs list */
+  const totalPrograms = programs.length
+  const liveJourneys  = programs.filter(p => p.status === 'Live').length
+
+  const stats = STATS_BASE.map(s => {
+    if (s.valueKey === 'totalPrograms') return { ...s, value: String(totalPrograms) }
+    if (s.valueKey === 'liveJourneys')  return { ...s, value: String(liveJourneys)  }
+    return s
+  })
+
+  function handleCreate({ name, description, color }) {
+    const newProg = {
+      id: `custom-${Date.now()}`,
+      name,
+      bank: description || 'Custom Program',
+      status: 'Draft',
+      stages: 4, enabledStages: 4,
+      lastModified: 'Just now',
+      color: color.color,
+      gradFrom: color.gradFrom,
+      gradTo: color.gradTo,
+      bg: color.bg,
+      initial: name.charAt(0).toUpperCase(),
+      applications: '—', conversion: '—',
+    }
+    onAddProgram(newProg)
     setShowNewModal(false)
-    onOpen('hdfc')
+    onOpen('hdfc', name)
   }
 
   return (
@@ -335,7 +381,7 @@ export default function HomePage({ onOpen }) {
           </div>
         </div>
 
-        {/* New Program button only */}
+        {/* New Program button */}
         <button
           onClick={() => setShowNewModal(true)}
           style={{
@@ -376,7 +422,7 @@ export default function HomePage({ onOpen }) {
 
         {/* Stats row */}
         <div className="home-stats-grid" style={{ marginBottom: 36 }}>
-          {STATS.map((s, i) => <StatCard key={i} stat={s} />)}
+          {stats.map((s, i) => <StatCard key={i} stat={s} />)}
         </div>
 
         {/* Programs header */}
@@ -396,13 +442,13 @@ export default function HomePage({ onOpen }) {
             backgroundColor: '#F3F4F6', borderRadius: 20, padding: '4px 12px',
             border: '1px solid #E5E7EB',
           }}>
-            {PROGRAMS.length} programs
+            {programs.length} program{programs.length !== 1 ? 's' : ''}
           </span>
         </div>
 
         {/* Programs grid */}
         <div className="home-programs-grid">
-          {PROGRAMS.map(prog => <ProgramCard key={prog.id} prog={prog} onOpen={onOpen} />)}
+          {programs.map(prog => <ProgramCard key={prog.id} prog={prog} onOpen={onOpen} />)}
           <CreateCard onClick={() => setShowNewModal(true)} />
         </div>
 
@@ -478,7 +524,12 @@ function StatCard({ stat: s }) {
 
 function ProgramCard({ prog, onOpen }) {
   const [hovered, setHovered] = useState(false)
-  const isLive = prog.status === 'Live'
+  const isLive    = prog.status === 'Live'
+  /* Built-in programs map to their own clientId; custom ones use 'hdfc' as template */
+  const builtinIds = ['hdfc', 'slice', 'jupiter']
+  const openArgs  = builtinIds.includes(prog.id)
+    ? [prog.id]
+    : ['hdfc', prog.name]
 
   return (
     <div
@@ -555,7 +606,7 @@ function ProgramCard({ prog, onOpen }) {
         {/* Actions */}
         <div style={{ display: 'flex', gap: 7 }}>
           <button
-            onClick={() => onOpen(prog.id)}
+            onClick={() => onOpen(...openArgs)}
             style={{
               flex: 1, height: 36, fontSize: 12.5, fontWeight: 600, color: '#fff',
               background: `linear-gradient(135deg, ${prog.gradFrom} 0%, ${prog.gradTo} 100%)`,
