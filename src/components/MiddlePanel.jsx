@@ -294,6 +294,7 @@ export default function MiddlePanel({
           style={{
             backgroundColor: '#F9FAFB',
             animation: 'stageFadeIn 0.2s ease-out',
+            willChange: 'opacity, transform',
           }}
         >
           <PanelCard>{content}</PanelCard>

@@ -1158,40 +1158,47 @@ export default function PreviewMode({ fields, kycMethods, stages, clientId = 'hd
     return null
   }
 
-  /* Shared animated screen wrapper used inside both shells */
-  function ScreenWrapper() {
-    return (
-      <div style={{ position: 'relative', flex: 1, overflow: 'hidden' }}>
-        {/* Departing screen slides out to the left */}
-        {departingEl && (
-          <div
-            key={departingKey}
-            style={{
-              position: 'absolute', inset: 0,
-              display: 'flex', flexDirection: 'column',
-              backgroundColor: '#fff',
-              animation: 'slideOutToLeft 0.25s ease-out forwards',
-              zIndex: 1,
-            }}
-            onAnimationEnd={() => setDeparting(null)}
-          >
-            {departingEl}
-          </div>
-        )}
-        {/* Incoming screen slides in from the right */}
+  /*
+   * IMPORTANT: do NOT extract this into a function component defined inside
+   * PreviewMode — that causes React to see a new component type every render
+   * and unmount/remount the entire subtree, killing CSS animations mid-frame.
+   * Keep it as plain JSX evaluated inline.
+   */
+  const screenSlider = (
+    <div style={{ position: 'relative', flex: 1, overflow: 'hidden' }}>
+      {/* Departing screen — slides out to the left */}
+      {departingEl && (
         <div
-          key={screenKey}
+          key={departingKey}
           style={{
             position: 'absolute', inset: 0,
             display: 'flex', flexDirection: 'column',
-            animation: screenKey === 0 ? 'none' : 'slideInFromRight 0.25s ease-out',
+            backgroundColor: '#fff',
+            animation: 'slideOutToLeft 0.28s cubic-bezier(0.4,0,0.2,1) forwards',
+            willChange: 'transform',
+            backfaceVisibility: 'hidden',
+            zIndex: 1,
           }}
+          onAnimationEnd={() => setDeparting(null)}
         >
-          {renderScreen()}
+          {departingEl}
         </div>
+      )}
+      {/* Incoming screen — slides in from the right */}
+      <div
+        key={screenKey}
+        style={{
+          position: 'absolute', inset: 0,
+          display: 'flex', flexDirection: 'column',
+          animation: screenKey === 0 ? 'none' : 'slideInFromRight 0.28s cubic-bezier(0.4,0,0.2,1)',
+          willChange: 'transform',
+          backfaceVisibility: 'hidden',
+        }}
+      >
+        {renderScreen()}
       </div>
-    )
-  }
+    </div>
+  )
 
   return (
     <div style={{
@@ -1208,13 +1215,9 @@ export default function PreviewMode({ fields, kycMethods, stages, clientId = 'hd
         overflow: 'auto', padding: '28px 24px',
       }}>
         {device === 'mobile' ? (
-          <PhoneShell>
-            <ScreenWrapper />
-          </PhoneShell>
+          <PhoneShell>{screenSlider}</PhoneShell>
         ) : (
-          <DesktopShell client={client}>
-            <ScreenWrapper />
-          </DesktopShell>
+          <DesktopShell client={client}>{screenSlider}</DesktopShell>
         )}
       </div>
     </div>
