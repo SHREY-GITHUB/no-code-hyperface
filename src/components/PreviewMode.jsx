@@ -1107,95 +1107,129 @@ export default function PreviewMode({ fields, kycMethods, stages, clientId = 'hd
     ? stages.filter(s => s.enabled).map(s => STAGE_SCREEN[s.name]).filter(Boolean)
     : [1, 2, 3, 4]
 
-  const [device, setDevice]         = useState('mobile')
-  const [screen, setScreen]         = useState(enabledScreens[0] ?? 1)
-  const [kycSubScreen, setKyc]      = useState(null) // null | 'otp'
-  const [showSuccess, setSuccess]   = useState(false)
-  const [screenKey, setScreenKey]   = useState(0)
-  const [departingEl, setDeparting] = useState(null)
-  const [departingKey, setDepKey]   = useState(0)
+  const [device, setDevice] = useState('mobile')
 
-  /* Navigate with dual slide: outgoing slides left, incoming slides in from right */
-  function navigate(fn) {
-    setDeparting(renderScreen())   // snapshot current screen JSX
-    setDepKey(k => k + 1)          // new key forces re-mount → re-triggers animation
-    fn()
-    setScreenKey(k => k + 1)
+  /*
+   * Route-based navigation state.
+   *
+   * WHY: the old approach stored departing screen JSX in state and rendered it
+   * inside a div with an incremented key. The key change forced React to
+   * unmount+remount the Screen component, resetting all its local state
+   * (e.g. Screen2's bureau-animation step jumped back to 0, Screen1's
+   * formPage jumped back to 1). That reset IS the visible glitch.
+   *
+   * FIX: track route as a plain object. Give each route a stable string key
+   * (routeKey). React matches elements by key across re-renders — so when the
+   * current screen moves to the "departing" slot it keeps the SAME key and
+   * React reuses the existing component instance, preserving all local state.
+   */
+  const [route, setRoute]       = useState({
+    screen: enabledScreens[0] ?? 1,
+    kyc: null,       // null | 'otp'
+    success: false,
+  })
+  const [prevRoute, setPrevRoute]     = useState(null)  // screen currently sliding out
+  const [transitioning, setTrans]     = useState(false)
+
+  /* Convert route → stable React key */
+  function routeKey(r) {
+    if (!r) return '__empty__'
+    if (r.success)  return 'success'
+    if (r.kyc)      return `s${r.screen}-${r.kyc}`
+    return `s${r.screen}`
+  }
+
+  /*
+   * Core navigation: moves current → prevRoute (slides out while keeping its
+   * component instance and all local state), then sets the new route as current.
+   */
+  function navigate(nextRoute) {
+    setPrevRoute(route)
+    setRoute(nextRoute)
+    setTrans(true)
   }
 
   /* Advance to next enabled screen */
   function next() {
-    navigate(() => {
-      setScreen(cur => {
-        const nextEnabled = enabledScreens.filter(n => n > cur)
-        return nextEnabled.length > 0 ? nextEnabled[0] : cur + 1
-      })
-    })
+    const ne = enabledScreens.filter(n => n > route.screen)
+    navigate({ screen: ne.length > 0 ? ne[0] : route.screen + 1, kyc: null, success: false })
   }
 
   function handleKycMethod(name) {
-    if (name === 'Aadhaar OTP') navigate(() => setKyc('otp'))
+    if (name === 'Aadhaar OTP') navigate({ screen: 3, kyc: 'otp', success: false })
     else next()
   }
 
   function handleOTPVerified() {
-    navigate(() => { setKyc(null); setScreen(s => { const ne = enabledScreens.filter(n => n > 3); return ne[0] ?? 4 }) })
+    const ne = enabledScreens.filter(n => n > 3)
+    navigate({ screen: ne[0] ?? 4, kyc: null, success: false })
   }
 
   function handleSubmit() {
-    navigate(() => setSuccess(true))
+    navigate({ screen: -1, kyc: null, success: true })
   }
 
-  function renderScreen() {
-    if (showSuccess) return <SuccessScreen client={client} onClose={onClose} />
-    if (screen === 1) return <Screen1 fields={fields} client={client} onNext={next} />
-    if (screen === 2) return <Screen2 client={client} demoControls={demoControls} onNext={next} />
-    if (screen === 3) {
-      if (kycSubScreen === 'otp') return <Screen3_OTP client={client} onVerified={handleOTPVerified} />
+  function renderRoute(r) {
+    if (!r) return null
+    if (r.success)      return <SuccessScreen client={client} onClose={onClose} />
+    if (r.screen === 1) return <Screen1 fields={fields} client={client} onNext={next} />
+    if (r.screen === 2) return <Screen2 client={client} demoControls={demoControls} onNext={next} />
+    if (r.screen === 3) {
+      if (r.kyc === 'otp') return <Screen3_OTP client={client} onVerified={handleOTPVerified} />
       return <Screen3_KYC kycMethods={kycMethods} client={client} onSelectMethod={handleKycMethod} />
     }
-    if (screen === 4) return <Screen4 client={client} onSubmit={handleSubmit} />
+    if (r.screen === 4) return <Screen4 client={client} onSubmit={handleSubmit} />
     return null
   }
 
   /*
-   * IMPORTANT: do NOT extract this into a function component defined inside
-   * PreviewMode — that causes React to see a new component type every render
-   * and unmount/remount the entire subtree, killing CSS animations mid-frame.
-   * Keep it as plain JSX evaluated inline.
+   * DO NOT extract screenSlider into an inner function component — React would
+   * see a different component type each render and unmount everything, killing
+   * CSS animations. Keep it as an inline JSX expression.
+   *
+   * The stable routeKey ensures React reuses the departing component instance
+   * (same key = same DOM node = local state preserved = no content reset).
    */
   const screenSlider = (
     <div style={{ position: 'relative', flex: 1, overflow: 'hidden' }}>
-      {/* Departing screen — slides out to the left */}
-      {departingEl && (
+
+      {/* Departing screen — keeps its original key → React preserves component
+          state, so Screen2 continues showing the approval card (not step=0)
+          and Screen1 shows the correct formPage while sliding away. */}
+      {prevRoute && (
         <div
-          key={departingKey}
+          key={routeKey(prevRoute)}
           style={{
             position: 'absolute', inset: 0,
             display: 'flex', flexDirection: 'column',
-            backgroundColor: '#fff',
-            animation: 'slideOutToLeft 0.28s cubic-bezier(0.4,0,0.2,1) forwards',
+            animation: 'slideOutToLeft 0.3s cubic-bezier(0.4,0,0.2,1) forwards',
             willChange: 'transform',
             backfaceVisibility: 'hidden',
             zIndex: 1,
           }}
-          onAnimationEnd={() => setDeparting(null)}
+          onAnimationEnd={() => { setPrevRoute(null); setTrans(false) }}
         >
-          {departingEl}
+          {renderRoute(prevRoute)}
         </div>
       )}
-      {/* Incoming screen — slides in from the right */}
+
+      {/* Incoming screen — new key → fresh component mount, slides in from right.
+          animation-fill-mode `both` = element starts at translateX(100%) before
+          the first paint, preventing the one-frame flash at position 0. */}
       <div
-        key={screenKey}
+        key={routeKey(route)}
         style={{
           position: 'absolute', inset: 0,
           display: 'flex', flexDirection: 'column',
-          animation: screenKey === 0 ? 'none' : 'slideInFromRight 0.28s cubic-bezier(0.4,0,0.2,1)',
-          willChange: 'transform',
+          animation: transitioning
+            ? 'slideInFromRight 0.3s cubic-bezier(0.4,0,0.2,1) both'
+            : 'none',
+          willChange: transitioning ? 'transform' : 'auto',
           backfaceVisibility: 'hidden',
+          zIndex: 0,
         }}
       >
-        {renderScreen()}
+        {renderRoute(route)}
       </div>
     </div>
   )
