@@ -3,7 +3,7 @@ import StageItem from './StageItem'
 
 export default function LeftPanel({ stages, setStages, selectedStage, onSelectStage, onHome, onPublish }) {
   const [draggingIdx, setDraggingIdx] = useState(null)
-  const [overIdx, setOverIdx] = useState(null)
+  const [overIdx,     setOverIdx]     = useState(null)
 
   function handleDragStart(e, idx) {
     setDraggingIdx(idx)
@@ -33,63 +33,72 @@ export default function LeftPanel({ stages, setStages, selectedStage, onSelectSt
     <aside
       className="flex flex-col h-full shrink-0"
       style={{
-        width: 260,
-        background: 'linear-gradient(180deg, #0F172A 0%, #0C1322 100%)',
-        borderRight: '1px solid rgba(255,255,255,0.05)',
+        width: 256,
+        backgroundColor: '#FFFFFF',
+        borderRight: '1px solid #E5E7EB',
       }}
     >
-      {/* Logo */}
+      {/* ── Logo / Brand ─────────────────────────────────── */}
       <div
         onClick={onHome}
         title="Back to Home"
         style={{
           display: 'flex', alignItems: 'center', gap: 10,
-          padding: '18px 20px 16px',
+          padding: '16px 18px 14px',
           cursor: 'pointer',
-          borderBottom: '1px solid rgba(255,255,255,0.06)',
+          borderBottom: '1px solid #F3F4F6',
         }}
       >
+        {/* Logo mark */}
         <div style={{
-          width: 32, height: 32, borderRadius: 9, flexShrink: 0,
+          width: 30, height: 30, borderRadius: 8, flexShrink: 0,
           background: 'linear-gradient(135deg, #3B82F6 0%, #2563EB 100%)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          boxShadow: '0 2px 10px rgba(59,130,246,0.4)',
+          boxShadow: '0 2px 8px rgba(37,99,235,0.28)',
         }}>
-          <span style={{ fontSize: 15, fontWeight: 800, color: '#fff', lineHeight: 1 }}>H</span>
+          <span style={{ fontSize: 14, fontWeight: 800, color: '#fff', lineHeight: 1, letterSpacing: '-0.5px' }}>H</span>
         </div>
-        <div>
-          <p style={{ fontSize: 13, fontWeight: 700, color: '#F8FAFC', margin: 0, letterSpacing: '-0.1px' }}>
+
+        <div style={{ minWidth: 0 }}>
+          <p style={{
+            fontSize: 13, fontWeight: 700, color: '#111827',
+            margin: 0, letterSpacing: '-0.2px', lineHeight: 1.2,
+          }}>
             Hyperface Studio
           </p>
-          <p style={{ fontSize: 10, color: '#475569', margin: 0, marginTop: 1 }}>
+          <p style={{ fontSize: 10, color: '#9CA3AF', margin: 0, marginTop: 2, fontWeight: 500 }}>
             Journey Configurator
           </p>
         </div>
       </div>
 
-      {/* Journey Stages */}
-      <div className="flex flex-col flex-1 overflow-y-auto" style={{ padding: '16px 12px 8px' }}>
+      {/* ── Stage list ───────────────────────────────────── */}
+      <div className="flex flex-col flex-1 overflow-y-auto" style={{ padding: '14px 10px 8px' }}>
 
         {/* Section header */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10, padding: '0 4px' }}>
+        <div style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          marginBottom: 8, padding: '0 6px',
+        }}>
           <p style={{
-            fontSize: 10, fontWeight: 700, color: '#475569',
-            textTransform: 'uppercase', letterSpacing: '0.1em', margin: 0,
+            fontSize: 10, fontWeight: 700, color: '#9CA3AF',
+            textTransform: 'uppercase', letterSpacing: '0.09em', margin: 0,
           }}>
             Journey Stages
           </p>
           <span style={{
             fontSize: 10, fontWeight: 600,
-            color: '#3B82F6',
-            backgroundColor: 'rgba(59,130,246,0.12)',
-            borderRadius: 10, padding: '2px 7px',
+            color: '#2563EB',
+            backgroundColor: '#EFF6FF',
+            borderRadius: 8, padding: '1.5px 7px',
+            border: '1px solid #DBEAFE',
           }}>
-            {liveCount}/{stages.length}
+            {liveCount} / {stages.length}
           </span>
         </div>
 
-        {/* Stage list */}
-        <ul style={{ padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 4 }}>
+        {/* Stages */}
+        <ul style={{ padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 2 }}>
           {stages.map((stage, idx) => (
             <StageItem
               key={stage.id}
@@ -110,39 +119,43 @@ export default function LeftPanel({ stages, setStages, selectedStage, onSelectSt
           ))}
         </ul>
 
-        <p style={{ fontSize: 10, color: '#334155', margin: '10px 4px 0', letterSpacing: '0.01em' }}>
+        <p style={{
+          fontSize: 10, color: '#D1D5DB', margin: '10px 6px 0',
+          letterSpacing: '0.01em', userSelect: 'none',
+        }}>
           ⠿ Drag to reorder stages
         </p>
       </div>
 
-      {/* Bottom: publish button */}
-      <div style={{ padding: '12px 12px 20px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+      {/* ── Footer / Publish ─────────────────────────────── */}
+      <div style={{ padding: '12px 10px 18px', borderTop: '1px solid #F3F4F6' }}>
         <button
           onClick={onPublish}
           style={{
-            width: '100%', height: 42,
+            width: '100%', height: 40,
             background: 'linear-gradient(135deg, #3B82F6 0%, #2563EB 100%)',
-            borderRadius: 10, fontSize: 13, fontWeight: 700,
+            borderRadius: 9, fontSize: 13, fontWeight: 600,
             color: '#fff', border: 'none', cursor: 'pointer',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
             fontFamily: 'inherit',
-            boxShadow: '0 2px 12px rgba(59,130,246,0.35)',
-            transition: 'all 0.15s',
+            boxShadow: '0 2px 10px rgba(37,99,235,0.22)',
+            transition: 'transform 0.15s, box-shadow 0.15s',
             letterSpacing: '-0.1px',
           }}
           onMouseEnter={e => {
             e.currentTarget.style.transform = 'translateY(-1px)'
-            e.currentTarget.style.boxShadow = '0 6px 20px rgba(59,130,246,0.45)'
+            e.currentTarget.style.boxShadow = '0 6px 18px rgba(37,99,235,0.32)'
           }}
           onMouseLeave={e => {
             e.currentTarget.style.transform = 'translateY(0)'
-            e.currentTarget.style.boxShadow = '0 2px 12px rgba(59,130,246,0.35)'
+            e.currentTarget.style.boxShadow = '0 2px 10px rgba(37,99,235,0.22)'
           }}
         >
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-            <path d="M7 1.5v8" stroke="white" strokeWidth="1.6" strokeLinecap="round"/>
-            <path d="M4.5 4L7 1.5 9.5 4" stroke="white" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
-            <path d="M2 10v1.5A1.5 1.5 0 003.5 13h7A1.5 1.5 0 0012 11.5V10" stroke="white" strokeWidth="1.4" strokeLinecap="round"/>
+          <svg width="13" height="13" viewBox="0 0 14 14" fill="none">
+            <path d="M7 1.5v8"              stroke="white" strokeWidth="1.6" strokeLinecap="round"/>
+            <path d="M4.5 4L7 1.5 9.5 4"   stroke="white" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M2 10v1.5A1.5 1.5 0 003.5 13h7A1.5 1.5 0 0012 11.5V10"
+                  stroke="white" strokeWidth="1.4" strokeLinecap="round"/>
           </svg>
           Publish Journey
         </button>

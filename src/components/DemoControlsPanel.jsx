@@ -4,25 +4,29 @@ function DemoToggle({ label, desc, value, onChange }) {
   return (
     <div style={{
       display: 'flex', alignItems: 'flex-start', gap: 10,
-      padding: '10px 0', borderBottom: '1px solid #F1F5F9',
+      padding: '9px 0', borderBottom: '1px solid #F3F4F6',
     }}>
       <div style={{ flex: 1 }}>
-        <div style={{ fontSize: 12, fontWeight: 500, color: '#1E293B', marginBottom: 2 }}>{label}</div>
-        <div style={{ fontSize: 11, color: '#94A3B8', lineHeight: 1.4 }}>{desc}</div>
+        <div style={{ fontSize: 12, fontWeight: 500, color: '#1F2937', marginBottom: 2 }}>{label}</div>
+        <div style={{ fontSize: 11, color: '#9CA3AF', lineHeight: 1.4 }}>{desc}</div>
       </div>
       <button
         onClick={() => onChange(!value)}
         style={{
-          width: 32, height: 18, borderRadius: 9, flexShrink: 0, marginTop: 2,
-          backgroundColor: value ? '#EF4444' : '#CBD5E1',
+          width: 30, height: 17, borderRadius: 9, flexShrink: 0, marginTop: 2,
+          backgroundColor: value ? '#EF4444' : '#E5E7EB',
           border: 'none', cursor: 'pointer', position: 'relative',
+          transition: 'background-color 0.2s',
+          boxShadow: value ? 'inset 0 1px 3px rgba(239,68,68,0.3)' : 'inset 0 1px 2px rgba(0,0,0,0.07)',
         }}
       >
         <span style={{
-          position: 'absolute', top: 2, left: value ? 16 : 2,
-          width: 14, height: 14, borderRadius: '50%',
-          backgroundColor: '#fff', transition: 'left 0.15s',
-          display: 'block', boxShadow: '0 1px 2px rgba(0,0,0,0.2)',
+          position: 'absolute', top: 2.5, left: value ? 15 : 2.5,
+          width: 12, height: 12, borderRadius: '50%',
+          backgroundColor: '#fff',
+          transition: 'left 0.18s cubic-bezier(0.34,1.56,0.64,1)',
+          display: 'block',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.18)',
         }} />
       </button>
     </div>
@@ -36,11 +40,11 @@ export default function DemoControlsPanel({ controls, onChange }) {
   return (
     <div style={{
       position: 'fixed', bottom: 20, right: 20, zIndex: 1000,
-      width: 244,
-      backgroundColor: '#fff',
+      width: 248,
+      backgroundColor: '#FFFFFF',
       borderRadius: 12,
-      boxShadow: '0 4px 24px rgba(0,0,0,0.12), 0 1px 4px rgba(0,0,0,0.06)',
-      border: '1px solid #E2E8F0',
+      boxShadow: '0 4px 24px rgba(0,0,0,0.09), 0 1px 4px rgba(0,0,0,0.05)',
+      border: '1px solid #E5E7EB',
       overflow: 'hidden',
       fontFamily: 'Inter, sans-serif',
     }}>
@@ -50,18 +54,23 @@ export default function DemoControlsPanel({ controls, onChange }) {
         style={{
           width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           padding: '10px 14px', background: 'none', border: 'none', cursor: 'pointer',
-          borderBottom: collapsed ? 'none' : '1px solid #F1F5F9',
+          borderBottom: collapsed ? 'none' : '1px solid #F3F4F6',
+          transition: 'background-color 0.15s',
         }}
+        onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#F9FAFB' }}
+        onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent' }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
           <div style={{
             width: 7, height: 7, borderRadius: '50%',
-            backgroundColor: anyActive ? '#EF4444' : '#22C55E',
-            boxShadow: anyActive ? '0 0 0 3px rgba(239,68,68,0.15)' : '0 0 0 3px rgba(34,197,94,0.15)',
-            transition: 'background-color 0.2s',
+            backgroundColor: anyActive ? '#EF4444' : '#10B981',
+            boxShadow: anyActive
+              ? '0 0 0 3px rgba(239,68,68,0.12)'
+              : '0 0 0 3px rgba(16,185,129,0.12)',
+            transition: 'all 0.2s',
           }} />
           <span style={{
-            fontSize: 11, fontWeight: 700, color: '#64748B',
+            fontSize: 10.5, fontWeight: 700, color: '#6B7280',
             letterSpacing: '0.08em', textTransform: 'uppercase',
           }}>
             Demo Controls
@@ -69,9 +78,9 @@ export default function DemoControlsPanel({ controls, onChange }) {
         </div>
         <svg
           width="12" height="12" viewBox="0 0 12 12" fill="none"
-          style={{ transform: collapsed ? 'rotate(-90deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}
+          style={{ transform: collapsed ? 'rotate(-90deg)' : 'rotate(0deg)', transition: 'transform 0.2s', color: '#9CA3AF' }}
         >
-          <path d="M3 4.5l3 3 3-3" stroke="#94A3B8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M3 4.5l3 3 3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </button>
 
@@ -96,7 +105,7 @@ export default function DemoControlsPanel({ controls, onChange }) {
             onChange={v => onChange({ bureauFailure: false, manualReview: false, lowScoreDecline: v })}
           />
           <p style={{
-            fontSize: 10, color: '#CBD5E1', margin: '10px 0 2px',
+            fontSize: 10, color: '#D1D5DB', margin: '9px 0 2px',
             textAlign: 'center', letterSpacing: '0.02em',
           }}>
             Affects bureau check in Preview Mode

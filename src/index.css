@@ -4,19 +4,29 @@
 
 /* ─── Design tokens ──────────────────────────────────────── */
 :root {
-  --shadow-xs:  0 1px 2px rgba(0,0,0,0.05);
-  --shadow-sm:  0 1px 4px rgba(0,0,0,0.05), 0 2px 8px rgba(0,0,0,0.03);
-  --shadow-md:  0 4px 12px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04);
-  --shadow-lg:  0 12px 32px rgba(0,0,0,0.12), 0 4px 8px rgba(0,0,0,0.06);
-  --shadow-blue: 0 4px 16px rgba(59,130,246,0.28);
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
+  --color-bg:       #F9FAFB;
+  --color-surface:  #FFFFFF;
+  --color-border:   #E5E7EB;
+  --color-border-s: #F3F4F6;
+  --color-text:     #111827;
+  --color-text-2:   #374151;
+  --color-text-3:   #6B7280;
+  --color-text-4:   #9CA3AF;
+  --color-accent:   #2563EB;
+  --color-accent-l: #EFF6FF;
+
+  --shadow-xs:   0 1px 2px rgba(0,0,0,0.04);
+  --shadow-sm:   0 1px 3px rgba(0,0,0,0.05), 0 2px 6px rgba(0,0,0,0.03);
+  --shadow-md:   0 4px 12px rgba(0,0,0,0.07), 0 1px 4px rgba(0,0,0,0.04);
+  --shadow-lg:   0 8px 28px rgba(0,0,0,0.09), 0 2px 8px rgba(0,0,0,0.05);
+  --shadow-blue: 0 4px 14px rgba(37,99,235,0.25);
+
+  --radius-sm: 7px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
 }
 
-* {
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
 html, body, #root {
   height: 100%;
@@ -25,6 +35,8 @@ html, body, #root {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+  background-color: #F9FAFB;
+  color: #111827;
 }
 
 /* ─── Keyframes ─────────────────────────────────────────── */
@@ -44,7 +56,6 @@ html, body, #root {
   to   { transform: scale(1); opacity: 1; }
 }
 
-/* Spring-like bounce for success checkmark */
 @keyframes springIn {
   0%   { transform: scale(0);    opacity: 0; }
   55%  { transform: scale(1.12); opacity: 1; }
@@ -57,126 +68,97 @@ html, body, #root {
   to   { transform: translateY(0);    opacity: 1; }
 }
 
-/* Checkmark stroke draw — for bureau rows (short path ~12px) */
 @keyframes checkDraw {
   from { stroke-dashoffset: 20; }
   to   { stroke-dashoffset: 0; }
 }
 
-/* Slide in from right — for preview screen transitions */
 @keyframes slideInFromRight {
   from { transform: translateX(100%); }
   to   { transform: translateX(0); }
 }
 
-/* Slide out to left — for departing preview screens */
 @keyframes slideOutToLeft {
   from { transform: translateX(0); }
   to   { transform: translateX(-100%); }
 }
 
-/* Fade + subtle lift — for middle panel stage switch */
 @keyframes stageFadeIn {
-  from { opacity: 0; transform: translateY(8px); }
+  from { opacity: 0; transform: translateY(6px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* Simple fade for dropdowns / overlays */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(-4px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* Analytics funnel / outcome bars grow in — --bar-w must be set inline */
 @keyframes barGrow {
   from { width: 0%; }
   to   { width: var(--bar-w); }
 }
 
-/* ─── Scrollbar ──────────────────────────────────────────── */
-
-::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: #CBD5E1;
-  border-radius: 99px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #94A3B8;
-}
-
-/* ─── Global button polish ───────────────────────────────── */
-
-button {
-  transition: opacity 0.15s, background-color 0.15s, transform 0.15s, box-shadow 0.15s, border-color 0.15s;
-  font-family: inherit;
-}
-
-/* Subtle press effect on all non-disabled buttons */
-button:not([disabled]):active {
-  transform: scale(0.97) !important;
-}
-
-/* Better focus ring */
-button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
-  outline: 2px solid #3B82F6;
-  outline-offset: 2px;
-}
-
-/* Remove default focus for mouse users */
-button:focus:not(:focus-visible) { outline: none; }
-
-/* ─── Live pulse animation for status dots ──────────────── */
 @keyframes livePulse {
   0%, 100% { box-shadow: 0 0 0 0 rgba(16,185,129,0.4); }
   50%       { box-shadow: 0 0 0 4px rgba(16,185,129,0); }
 }
 
-/* Smooth scrollbars */
+/* ─── Scrollbar ──────────────────────────────────────────── */
+
+::-webkit-scrollbar       { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #D1D5DB; border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: #9CA3AF; }
+
 * {
   scrollbar-width: thin;
-  scrollbar-color: #CBD5E1 transparent;
+  scrollbar-color: #D1D5DB transparent;
 }
+
+/* ─── Global button polish ───────────────────────────────── */
+
+button {
+  transition: opacity 0.15s, background-color 0.15s, transform 0.15s, box-shadow 0.15s, border-color 0.15s, color 0.15s;
+  font-family: inherit;
+}
+
+button:not([disabled]):active {
+  transform: scale(0.97) !important;
+}
+
+button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: 2px solid #3B82F6;
+  outline-offset: 2px;
+}
+
+button:focus:not(:focus-visible) { outline: none; }
 
 /* ─── Main editor layout ─────────────────────────────────── */
 
-/* Left panel: slide-in drawer on mobile */
 .left-panel-drawer {
   transition: transform 0.25s cubic-bezier(0.4,0,0.2,1);
 }
 
-/* Right panel: hidden on mobile */
 .right-panel-desktop { display: flex; flex-direction: column; height: 100%; }
 
-/* Overlay behind open drawer */
 .drawer-overlay {
   display: none;
   position: fixed; inset: 0;
-  background: rgba(0,0,0,0.45);
+  background: rgba(0,0,0,0.35);
   z-index: 490;
   animation: fadeIn 0.2s ease-out;
 }
 
-/* Mobile top bar hamburger — hidden on desktop */
 .mobile-menu-btn { display: none; }
 
-/* Scenario active text — hidden on very small screens */
 .scenario-text { display: flex; }
 
-/* Middle panel top bar — full padding on desktop */
 .middle-topbar { padding: 0 24px; }
 
-/* Settings panels — 2-col grids */
 .settings-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 .settings-3col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
 .settings-pad  { padding: 28px 32px; }
 
-/* Publish modal */
 .publish-modal-box {
   width: 540px;
   max-height: 90vh;
@@ -184,10 +166,8 @@ button:focus:not(:focus-visible) { outline: none; }
   position: relative;
 }
 
-/* Settings content area padding */
 .settings-content-pad { padding: 24px 24px 0; }
 
-/* Demo controls panel */
 .demo-panel-wrap {
   position: fixed;
   bottom: 24px;
@@ -196,7 +176,6 @@ button:focus:not(:focus-visible) { outline: none; }
 }
 
 @media (max-width: 768px) {
-  /* Left panel: off-screen by default, slides in when .menu-open */
   .left-panel-drawer {
     position: fixed !important;
     top: 0; left: 0;
@@ -204,62 +183,37 @@ button:focus:not(:focus-visible) { outline: none; }
     z-index: 500;
     transform: translateX(-100%);
   }
-  .left-panel-drawer.menu-open {
-    transform: translateX(0);
-  }
-  .drawer-overlay.menu-open { display: block; }
-
-  /* Right panel: hidden on mobile */
-  .right-panel-desktop { display: none !important; }
-
-  /* Hamburger visible on mobile */
-  .mobile-menu-btn { display: flex !important; }
-
-  /* Scenario active text — hide label, keep dot */
+  .left-panel-drawer.menu-open { transform: translateX(0); }
+  .drawer-overlay.menu-open    { display: block; }
+  .right-panel-desktop         { display: none !important; }
+  .mobile-menu-btn             { display: flex !important; }
   .scenario-text span:last-child { display: none; }
-
-  /* Middle top bar compact */
-  .middle-topbar { padding: 0 14px; }
-
-  /* Collapse 2/3-col grids to 1-col */
-  .settings-2col { grid-template-columns: 1fr !important; }
-  .settings-3col { grid-template-columns: 1fr !important; }
-
-  /* Tighter inner padding on settings panels */
-  .settings-pad  { padding: 20px 16px !important; }
-  .settings-content-pad { padding: 12px 12px 0 !important; }
-
-  /* Empty state card min-width override */
-  .empty-state-card { min-width: 0 !important; width: 100%; }
-
-  /* Publish modal full-screen */
+  .middle-topbar               { padding: 0 14px; }
+  .settings-2col               { grid-template-columns: 1fr !important; }
+  .settings-3col               { grid-template-columns: 1fr !important; }
+  .settings-pad                { padding: 20px 16px !important; }
+  .settings-content-pad        { padding: 12px 12px 0 !important; }
+  .empty-state-card            { min-width: 0 !important; width: 100%; }
   .publish-modal-box {
     width: 100vw !important;
     max-height: 100dvh !important;
     border-radius: 0 !important;
     height: 100dvh;
   }
-
-  /* Demo controls — bottom-left on mobile, smaller */
-  .demo-panel-wrap {
-    right: 12px;
-    bottom: 12px;
-  }
+  .demo-panel-wrap { right: 12px; bottom: 12px; }
 }
 
 /* ─── HomePage responsive layout ────────────────────────── */
 
 .home-topbar        { padding: 0 32px; }
 .home-body          { padding: 32px 40px; }
-.home-stats-grid    { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
+.home-stats-grid    { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 32px; }
 .home-programs-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
 
-/* Tablet — ≤ 1024px */
 @media (max-width: 1024px) {
   .home-programs-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
-/* Mobile — ≤ 640px */
 @media (max-width: 640px) {
   .home-topbar              { padding: 0 16px; }
   .home-topbar-breadcrumb   { display: none; }
